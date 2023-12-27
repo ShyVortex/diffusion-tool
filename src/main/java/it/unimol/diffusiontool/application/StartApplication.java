@@ -18,7 +18,7 @@ public class StartApplication extends Application {
 
 	public void init() throws Exception {
 		FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/start.fxml"));
-		this.rootNode = (Parent)fxmlLoader.load();
+		this.rootNode = fxmlLoader.load();
 	}
 
 	public void start(Stage stage) {

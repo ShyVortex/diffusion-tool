@@ -1,6 +1,5 @@
 package it.unimol.diffusiontool.application;
 
-import it.unimol.diffusiontool.controller.DiffusionController;
 import it.unimol.diffusiontool.entity.User;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -55,14 +54,12 @@ public class DiffusionApplication extends Application {
     public void init() throws Exception {
         toolInstance = this;
         this.fxmlLoader = new FXMLLoader(this.getClass().getResource("/app-home-view.fxml"));
-        this.rootNode = (Parent)this.fxmlLoader.load();
+        this.rootNode = this.fxmlLoader.load();
     }
 
     public void start(Stage stage) {
-        this.fxmlLoader.setController(DiffusionController.getControllerInstance());
-        DiffusionController diffusionController = (DiffusionController)this.fxmlLoader.getController();
-        diffusionController.setApplicationInstance(this);
         stage.setScene(new Scene(this.rootNode));
+        stage.setResizable(false);
         stage.show();
         this.stage = stage;
     }
@@ -74,7 +71,7 @@ public class DiffusionApplication extends Application {
 
     public void refresh() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/app-home-view.fxml"));
-        this.rootNode = (Parent)fxmlLoader.load();
+        this.rootNode = fxmlLoader.load();
         this.start(this.stage);
     }
 }

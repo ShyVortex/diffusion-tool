@@ -17,7 +17,7 @@ public class UsernameValidator {
     }
 
     protected void initSpecialChars() {
-        this.specialChars = new ArrayList();
+        this.specialChars = new ArrayList<>();
         this.specialChars.add("#");
         this.specialChars.add("*");
         this.specialChars.add(";");
@@ -43,16 +43,16 @@ public class UsernameValidator {
     }
 
     private boolean containsAny(String characterSequence, Collection<String> searchList) {
-        Iterator var3 = searchList.iterator();
-
+        Iterator<String> iterator = searchList.iterator();
         String str;
-        do {
-            if (!var3.hasNext()) {
-                return false;
-            }
 
-            str = (String)var3.next();
-        } while(!characterSequence.contains(str));
+        do {
+            if (!iterator.hasNext())
+                return false;
+
+            str = iterator.next();
+        }
+        while (!characterSequence.contains(str));
 
         return true;
     }

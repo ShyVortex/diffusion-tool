@@ -42,7 +42,7 @@ public class LoginApplication extends Application {
         loginInstance = this;
         UserManager userManager = UserManager.getInstance();
         FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/login-view.fxml"));
-        this.rootNode = (Parent)fxmlLoader.load();
+        this.rootNode = fxmlLoader.load();
     }
 
     public void start(Stage stage) {

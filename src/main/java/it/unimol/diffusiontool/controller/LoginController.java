@@ -55,7 +55,7 @@ public class LoginController {
     private void onSignInClick() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/login-view.fxml"));
         LoginApplication loginApplication = LoginApplication.getLoginInstance();
-        Parent rootNode = (Parent)fxmlLoader.load();
+        Parent rootNode = fxmlLoader.load();
         loginApplication.setRootNode(rootNode);
         loginApplication.restart(rootNode);
     }
@@ -64,7 +64,7 @@ public class LoginController {
     private void onSignUpClick() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/signup-view.fxml"));
         LoginApplication loginApplication = LoginApplication.getLoginInstance();
-        Parent rootNode = (Parent)fxmlLoader.load();
+        Parent rootNode = fxmlLoader.load();
         loginApplication.setRootNode(rootNode);
         loginApplication.restart(rootNode);
     }
@@ -82,12 +82,13 @@ public class LoginController {
         Optional<User> user = Optional.ofNullable(this.userManager.findByUsername(username));
 
         Alert incorrectPassAlert;
+
         try {
-            if (!user.isPresent()) {
+            if (user.isEmpty()) {
                 throw new UserNotFoundException("User not found: " + username);
             }
 
-            if (!password.equals(((User)user.get()).getPassword())) {
+            if (!password.equals((user.get()).getPassword())) {
                 throw new IncorrectPasswordException();
             }
 
@@ -95,22 +96,22 @@ public class LoginController {
             Stage stage = (Stage)this.confirmSignInButton.getScene().getWindow();
             stage.close();
             diffusionApp.init();
-            diffusionApp.setUser((User)user.get());
+            diffusionApp.setUser(user.get());
             diffusionApp.start(new Stage());
-        } catch (UserNotFoundException var6) {
+
+        } catch (UserNotFoundException e) {
             incorrectPassAlert = new Alert(AlertType.ERROR);
             incorrectPassAlert.setHeaderText("ERROR: User not found");
             incorrectPassAlert.setContentText("No user has been found with such credentials.");
             incorrectPassAlert.showAndWait();
-        } catch (IncorrectPasswordException var7) {
+        } catch (IncorrectPasswordException e) {
             incorrectPassAlert = new Alert(AlertType.ERROR);
             incorrectPassAlert.setHeaderText("ERROR: Incorrect password");
             incorrectPassAlert.setContentText("Login has failed due to credentials not matching.");
             incorrectPassAlert.showAndWait();
-        } catch (Exception var8) {
-            throw new RuntimeException(var8);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
     }
 
     @FXML
@@ -118,33 +119,25 @@ public class LoginController {
         String email = this.emailField.getText();
         String username = this.usernameField.getText();
         String password = this.passwordField.getText();
-        LocalDate birthDate = (LocalDate)this.birthdatePicker.getValue();
+        LocalDate birthDate = this.birthdatePicker.getValue();
         Optional<User> duplicated = Optional.ofNullable(this.userManager.findByUsername(username));
         EmailValidator emailValidator = EmailValidator.getInstance();
         UsernameValidator usernameValidator = UsernameValidator.getInstance();
         BirthdateValidator birthdateValidator = BirthdateValidator.getInstance();
 
         Alert dupUserAlert;
+
         try {
-            if (email.isEmpty() || username.isEmpty() || password.isEmpty() || birthDate == null) {
+            if (email.isEmpty() || username.isEmpty() || password.isEmpty() || birthDate == null)
                 throw new BlankFieldException();
-            }
-
-            if (!emailValidator.isValid(email)) {
+            if (!emailValidator.isValid(email))
                 throw new InvalidEmailException();
-            }
-
-            if (!usernameValidator.isValid(username)) {
+            if (!usernameValidator.isValid(username))
                 throw new InvalidUsernameException();
-            }
-
-            if (!birthdateValidator.isValid(birthDate)) {
+            if (!birthdateValidator.isValid(birthDate))
                 throw new InvalidDateException();
-            }
-
-            if (duplicated.isPresent()) {
+            if (duplicated.isPresent())
                 throw new DuplicatedUserException();
-            }
 
             User user = new User(email, username, password, birthDate);
             this.userManager.addUser(user);
@@ -154,34 +147,34 @@ public class LoginController {
             diffusionApp.init();
             diffusionApp.setUser(user);
             diffusionApp.start(new Stage());
-        } catch (BlankFieldException var12) {
+
+        } catch (BlankFieldException e) {
             dupUserAlert = new Alert(AlertType.ERROR);
             dupUserAlert.setHeaderText("ERROR: Blank field detected");
             dupUserAlert.setContentText("You have left at least one field empty. Please complete the whole form.");
             dupUserAlert.showAndWait();
-        } catch (InvalidEmailException var13) {
+        } catch (InvalidEmailException e) {
             dupUserAlert = new Alert(AlertType.ERROR);
             dupUserAlert.setHeaderText("ERROR: Invalid Email");
             dupUserAlert.setContentText("You have inserted an invalid email. Please retry.");
             dupUserAlert.showAndWait();
-        } catch (InvalidUsernameException var14) {
+        } catch (InvalidUsernameException e) {
             dupUserAlert = new Alert(AlertType.ERROR);
             dupUserAlert.setHeaderText("ERROR: Invalid Username");
             dupUserAlert.setContentText("You have inserted an invalid username. Please retry");
             dupUserAlert.showAndWait();
-        } catch (InvalidDateException var15) {
+        } catch (InvalidDateException e) {
             dupUserAlert = new Alert(AlertType.ERROR);
             dupUserAlert.setHeaderText("ERROR: Invalid Birthdate");
             dupUserAlert.setContentText("You have inserted an invalid birthdate. Please retry");
             dupUserAlert.showAndWait();
-        } catch (DuplicatedUserException var16) {
+        } catch (DuplicatedUserException e) {
             dupUserAlert = new Alert(AlertType.ERROR);
             dupUserAlert.setHeaderText("ERROR: Duplicated User");
             dupUserAlert.setContentText("An user with such username already exists.");
             dupUserAlert.showAndWait();
-        } catch (Exception var17) {
-            throw new RuntimeException(var17);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
     }
 }

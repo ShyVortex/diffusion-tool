@@ -17,7 +17,7 @@ public class StartController {
     @FXML
     private void onLaunchButtonClick() throws IOException {
         HelloApplication hello = new HelloApplication();
-        Stage stage = (Stage)this.launchButton.getScene().getWindow();
+        Stage stage = (Stage) this.launchButton.getScene().getWindow();
         stage.close();
         hello.start(new Stage());
     }

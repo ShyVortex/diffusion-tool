@@ -22,7 +22,7 @@ public class User {
         this.password = password;
         this.birthDate = birthDate;
         this.profilePic = new Image("/default/new-user.png");
-        this.generatedImages = new ArrayList();
+        this.generatedImages = new ArrayList<>();
     }
 
     public String getId() {
@@ -74,6 +74,9 @@ public class User {
     }
 
     public String toString() {
-        return "User {\n id='" + this.id + "',\n email='" + this.email + "',\n username='" + this.username + "',\n password='" + this.password + "',\n birthDate=" + this.birthDate + ",\n profilePic=" + this.profilePic + ",\n generatedImages=" + this.generatedImages + "\n}";
+        return "User {\n id='" + this.id + "',\n email='" + this.email + "',\n username='"
+                + this.username + "',\n password='" + this.password + "',\n birthDate="
+                + this.birthDate + ",\n profilePic=" + this.profilePic + ",\n generatedImages="
+                + this.generatedImages + "\n}";
     }
 }
