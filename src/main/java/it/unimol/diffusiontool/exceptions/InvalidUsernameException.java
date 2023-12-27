@@ -1,4 +1,4 @@
 package it.unimol.diffusiontool.exceptions;
 
-public class InvalidUsernameException {
+public class InvalidUsernameException extends Exception {
 }

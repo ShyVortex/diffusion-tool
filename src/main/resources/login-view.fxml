@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="575.0" prefWidth="430.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unimol.diffusiontool.controller.LoginController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="575.0" prefWidth="430.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unimol.diffusiontool.controller.LoginController">
    <AnchorPane prefHeight="73.0" prefWidth="430.0">
       <Button fx:id="signInButton" layoutX="42.0" layoutY="25.0" mnemonicParsing="false" onAction="#onSignInClick" text="SIGN IN" />
       <Button fx:id="signUpButton" layoutX="141.0" layoutY="25.0" mnemonicParsing="false" onAction="#onSignUpClick" text="SIGN UP" />

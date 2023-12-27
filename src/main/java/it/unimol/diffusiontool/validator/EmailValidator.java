@@ -1,4 +1,4 @@
-package it.unimol.diffusiontool.entity;
+package it.unimol.diffusiontool.validator;
 
 import java.util.ArrayList;
 import java.util.Collection;

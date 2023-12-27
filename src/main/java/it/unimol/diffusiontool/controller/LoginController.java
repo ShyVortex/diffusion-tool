@@ -1,29 +1,24 @@
 package it.unimol.diffusiontool.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import it.unimol.diffusiontool.application.DiffusionApplication;
 import it.unimol.diffusiontool.application.LoginApplication;
 import it.unimol.diffusiontool.entity.User;
-import it.unimol.diffusiontool.exceptions.BlankFieldException;
-import it.unimol.diffusiontool.exceptions.DuplicatedUserException;
-import it.unimol.diffusiontool.exceptions.IncorrectPasswordException;
-import it.unimol.diffusiontool.exceptions.UserNotFoundException;
-import it.unimol.diffusiontool.repository.UserRepository;
-import it.unimol.diffusiontool.service.UserService;
+import it.unimol.diffusiontool.entity.UserManager;
+import it.unimol.diffusiontool.exceptions.*;
+import it.unimol.diffusiontool.validator.BirthdateValidator;
+import it.unimol.diffusiontool.validator.EmailValidator;
+import it.unimol.diffusiontool.validator.UsernameValidator;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.client.RestTemplate;
+import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 
-@Controller
 public class LoginController {
     @FXML
     private Button signInButton;
@@ -51,19 +46,16 @@ public class LoginController {
     private Button confirmSignInButton;
     @FXML
     private Button confirmSignUpButton;
-    @Autowired
-    private UserController userController;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
+    private UserManager userManager = UserManager.getInstance();
+
+    public LoginController() {
+    }
 
     @FXML
     private void onSignInClick() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/login-view.fxml"));
         LoginApplication loginApplication = LoginApplication.getLoginInstance();
-        fxmlLoader.setControllerFactory(loginApplication.getSpringContext()::getBean);
-        Parent rootNode = fxmlLoader.load();
+        Parent rootNode = (Parent)fxmlLoader.load();
         loginApplication.setRootNode(rootNode);
         loginApplication.restart(rootNode);
     }
@@ -72,8 +64,7 @@ public class LoginController {
     private void onSignUpClick() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/signup-view.fxml"));
         LoginApplication loginApplication = LoginApplication.getLoginInstance();
-        fxmlLoader.setControllerFactory(loginApplication.getSpringContext()::getBean);
-        Parent rootNode = fxmlLoader.load();
+        Parent rootNode = (Parent)fxmlLoader.load();
         loginApplication.setRootNode(rootNode);
         loginApplication.restart(rootNode);
     }
@@ -88,29 +79,38 @@ public class LoginController {
     private void onConfirmSignInClick() {
         String username = this.usernameField.getText();
         String password = this.passwordField.getText();
-        Optional<User> user = userRepository.findByUsername(username);
+        Optional<User> user = Optional.ofNullable(this.userManager.findByUsername(username));
 
+        Alert incorrectPassAlert;
         try {
-            if (user.isPresent()) {
-                if (password.equals(user.get().getPassword())) {
-                    // todo
-                }
-                else
-                    throw new IncorrectPasswordException();
-            }
-            else
+            if (!user.isPresent()) {
                 throw new UserNotFoundException("User not found: " + username);
+            }
 
-        } catch (UserNotFoundException e) {
-            Alert notFoundAlert = new Alert(Alert.AlertType.ERROR);
-            notFoundAlert.setHeaderText("ERROR: User not found");
-            notFoundAlert.setContentText("No user has been found with such credentials.");
-            notFoundAlert.showAndWait();
-        } catch (IncorrectPasswordException e) {
-            Alert incorrectPassAlert = new Alert(Alert.AlertType.ERROR);
+            if (!password.equals(((User)user.get()).getPassword())) {
+                throw new IncorrectPasswordException();
+            }
+
+            DiffusionApplication diffusionApp = new DiffusionApplication();
+            Stage stage = (Stage)this.confirmSignInButton.getScene().getWindow();
+            stage.close();
+            diffusionApp.init();
+            diffusionApp.setUser((User)user.get());
+            diffusionApp.start(new Stage());
+        } catch (UserNotFoundException var6) {
+            incorrectPassAlert = new Alert(AlertType.ERROR);
+            incorrectPassAlert.setHeaderText("ERROR: User not found");
+            incorrectPassAlert.setContentText("No user has been found with such credentials.");
+            incorrectPassAlert.showAndWait();
+        } catch (IncorrectPasswordException var7) {
+            incorrectPassAlert = new Alert(AlertType.ERROR);
             incorrectPassAlert.setHeaderText("ERROR: Incorrect password");
-            incorrectPassAlert.setContentText("Login has failed due to not matching credentials.");
+            incorrectPassAlert.setContentText("Login has failed due to credentials not matching.");
+            incorrectPassAlert.showAndWait();
+        } catch (Exception var8) {
+            throw new RuntimeException(var8);
         }
+
     }
 
     @FXML
@@ -118,34 +118,70 @@ public class LoginController {
         String email = this.emailField.getText();
         String username = this.usernameField.getText();
         String password = this.passwordField.getText();
-        LocalDate birthDate = this.birthdatePicker.getValue();
+        LocalDate birthDate = (LocalDate)this.birthdatePicker.getValue();
+        Optional<User> duplicated = Optional.ofNullable(this.userManager.findByUsername(username));
+        EmailValidator emailValidator = EmailValidator.getInstance();
+        UsernameValidator usernameValidator = UsernameValidator.getInstance();
+        BirthdateValidator birthdateValidator = BirthdateValidator.getInstance();
 
+        Alert dupUserAlert;
         try {
-            // Check for blank fields
             if (email.isEmpty() || username.isEmpty() || password.isEmpty() || birthDate == null) {
                 throw new BlankFieldException();
             }
 
-            // Create JSON payload
-            ObjectMapper objectMapper = new ObjectMapper();
-            ObjectNode requestPayload = objectMapper.createObjectNode();
-            requestPayload.put("email", email);
-            requestPayload.put("username", username);
-            requestPayload.put("password", password);
-            requestPayload.put("birthDate", birthDate.toString());
+            if (!emailValidator.isValid(email)) {
+                throw new InvalidEmailException();
+            }
 
-            // Make HTTP request to createUser endpoint
-            userController.registerUser(requestPayload);
-        }/* catch (DuplicatedUserException e) {
-            Alert dupUserAlert = new Alert(Alert.AlertType.ERROR);
+            if (!usernameValidator.isValid(username)) {
+                throw new InvalidUsernameException();
+            }
+
+            if (!birthdateValidator.isValid(birthDate)) {
+                throw new InvalidDateException();
+            }
+
+            if (duplicated.isPresent()) {
+                throw new DuplicatedUserException();
+            }
+
+            User user = new User(email, username, password, birthDate);
+            this.userManager.addUser(user);
+            DiffusionApplication diffusionApp = new DiffusionApplication();
+            Stage stage = (Stage)this.confirmSignUpButton.getScene().getWindow();
+            stage.close();
+            diffusionApp.init();
+            diffusionApp.setUser(user);
+            diffusionApp.start(new Stage());
+        } catch (BlankFieldException var12) {
+            dupUserAlert = new Alert(AlertType.ERROR);
+            dupUserAlert.setHeaderText("ERROR: Blank field detected");
+            dupUserAlert.setContentText("You have left at least one field empty. Please complete the whole form.");
+            dupUserAlert.showAndWait();
+        } catch (InvalidEmailException var13) {
+            dupUserAlert = new Alert(AlertType.ERROR);
+            dupUserAlert.setHeaderText("ERROR: Invalid Email");
+            dupUserAlert.setContentText("You have inserted an invalid email. Please retry.");
+            dupUserAlert.showAndWait();
+        } catch (InvalidUsernameException var14) {
+            dupUserAlert = new Alert(AlertType.ERROR);
+            dupUserAlert.setHeaderText("ERROR: Invalid Username");
+            dupUserAlert.setContentText("You have inserted an invalid username. Please retry");
+            dupUserAlert.showAndWait();
+        } catch (InvalidDateException var15) {
+            dupUserAlert = new Alert(AlertType.ERROR);
+            dupUserAlert.setHeaderText("ERROR: Invalid Birthdate");
+            dupUserAlert.setContentText("You have inserted an invalid birthdate. Please retry");
+            dupUserAlert.showAndWait();
+        } catch (DuplicatedUserException var16) {
+            dupUserAlert = new Alert(AlertType.ERROR);
             dupUserAlert.setHeaderText("ERROR: Duplicated User");
             dupUserAlert.setContentText("An user with such username already exists.");
             dupUserAlert.showAndWait();
-        }*/ catch (BlankFieldException e) {
-            Alert blankAlert = new Alert(Alert.AlertType.ERROR);
-            blankAlert.setHeaderText("ERROR: Blank field detected");
-            blankAlert.setContentText("You have left at least one field empty. Please complete the whole form.");
-            blankAlert.showAndWait();
+        } catch (Exception var17) {
+            throw new RuntimeException(var17);
         }
+
     }
 }
