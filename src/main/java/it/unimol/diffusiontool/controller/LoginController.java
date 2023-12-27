@@ -95,8 +95,8 @@ public class LoginController {
             DiffusionApplication diffusionApp = new DiffusionApplication();
             Stage stage = (Stage)this.confirmSignInButton.getScene().getWindow();
             stage.close();
-            diffusionApp.init();
             diffusionApp.setUser(user.get());
+            diffusionApp.init();
             diffusionApp.start(new Stage());
 
         } catch (UserNotFoundException e) {
@@ -144,8 +144,8 @@ public class LoginController {
             DiffusionApplication diffusionApp = new DiffusionApplication();
             Stage stage = (Stage)this.confirmSignUpButton.getScene().getWindow();
             stage.close();
-            diffusionApp.init();
             diffusionApp.setUser(user);
+            diffusionApp.init();
             diffusionApp.start(new Stage());
 
         } catch (BlankFieldException e) {
