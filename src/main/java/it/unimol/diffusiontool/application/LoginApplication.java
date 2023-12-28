@@ -1,6 +1,6 @@
 package it.unimol.diffusiontool.application;
 
-import it.unimol.diffusiontool.entity.UserManager;
+import it.unimol.diffusiontool.entities.UserManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

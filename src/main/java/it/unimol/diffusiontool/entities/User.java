@@ -1,4 +1,4 @@
-package it.unimol.diffusiontool.entity;
+package it.unimol.diffusiontool.entities;
 
 import javafx.scene.image.Image;
 
@@ -15,6 +15,7 @@ public class User {
     private LocalDate birthDate;
     private Image profilePic;
     private Collection<GeneratedImage> generatedImages;
+    private int upscImgsNum;
 
     public User(String email, String username, String password, LocalDate birthDate) {
         this.email = email;
@@ -23,6 +24,7 @@ public class User {
         this.birthDate = birthDate;
         this.profilePic = new Image("/default/new-user.png");
         this.generatedImages = new ArrayList<>();
+        this.upscImgsNum = 0;
     }
 
     public String getId() {
@@ -53,6 +55,10 @@ public class User {
         return this.generatedImages;
     }
 
+    public int getUpscImgsNum() {
+        return upscImgsNum;
+    }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -71,6 +77,14 @@ public class User {
 
     public void setProfilePic(Image profilePic) {
         this.profilePic = profilePic;
+    }
+
+    public int countGeneratedImgs() {
+        int num = 0;
+        for (GeneratedImage img : this.generatedImages)
+            num++;
+
+        return num;
     }
 
     public String toString() {

@@ -1,4 +1,4 @@
-package it.unimol.diffusiontool.entity;
+package it.unimol.diffusiontool.entities;
 
 import java.util.HashMap;
 import java.util.Iterator;

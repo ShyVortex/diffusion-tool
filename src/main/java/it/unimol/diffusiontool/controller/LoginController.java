@@ -2,12 +2,12 @@ package it.unimol.diffusiontool.controller;
 
 import it.unimol.diffusiontool.application.DiffusionApplication;
 import it.unimol.diffusiontool.application.LoginApplication;
-import it.unimol.diffusiontool.entity.User;
-import it.unimol.diffusiontool.entity.UserManager;
+import it.unimol.diffusiontool.entities.User;
+import it.unimol.diffusiontool.entities.UserManager;
 import it.unimol.diffusiontool.exceptions.*;
-import it.unimol.diffusiontool.validator.BirthdateValidator;
-import it.unimol.diffusiontool.validator.EmailValidator;
-import it.unimol.diffusiontool.validator.UsernameValidator;
+import it.unimol.diffusiontool.validators.BirthdateValidator;
+import it.unimol.diffusiontool.validators.EmailValidator;
+import it.unimol.diffusiontool.validators.UsernameValidator;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

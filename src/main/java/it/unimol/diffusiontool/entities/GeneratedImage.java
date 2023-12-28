@@ -1,4 +1,4 @@
-package it.unimol.diffusiontool.entity;
+package it.unimol.diffusiontool.entities;
 
 import javafx.scene.image.Image;
 

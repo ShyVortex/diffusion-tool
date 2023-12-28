@@ -13,6 +13,6 @@ module it.unimol.diffusiontool {
     exports it.unimol.diffusiontool;
     exports it.unimol.diffusiontool.application;
     exports it.unimol.diffusiontool.controller;
-    exports it.unimol.diffusiontool.entity;
+    exports it.unimol.diffusiontool.entities;
     opens it.unimol.diffusiontool.controller to javafx.fxml;
 }
