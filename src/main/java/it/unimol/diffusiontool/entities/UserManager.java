@@ -31,32 +31,47 @@ public class UserManager {
 
     public boolean exists(String username) {
         Iterator<User> iterator = this.users.values().iterator();
-        User x;
+        User user;
 
         do {
             if (!iterator.hasNext())
                 return false;
 
-            x = iterator.next();
+            user = iterator.next();
         }
-        while (!username.equals(x.getUsername()));
+        while (!username.equals(user.getUsername()));
+
+        return true;
+    }
+
+    public boolean existsByEmail(String email) {
+        Iterator<User> iterator = this.users.values().iterator();
+        User user;
+
+        do {
+            if (!iterator.hasNext())
+                return false;
+
+            user = iterator.next();
+        }
+        while (!email.equals(user.getEmail()));
 
         return true;
     }
 
     public User findByUsername(String username) {
         Iterator<User> iterator = this.users.values().iterator();
-        User x;
+        User user;
 
         do {
             if (!iterator.hasNext())
                 return null;
 
-            x = iterator.next();
+            user = iterator.next();
         }
-        while (!username.equals(x.getUsername()));
+        while (!username.equals(user.getUsername()));
 
-        return x;
+        return user;
     }
 
     public String toString() {

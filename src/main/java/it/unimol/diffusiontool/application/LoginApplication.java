@@ -1,6 +1,7 @@
 package it.unimol.diffusiontool.application;
 
 import it.unimol.diffusiontool.entities.UserManager;
+import it.unimol.diffusiontool.properties.FXMLProperties;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -41,7 +42,7 @@ public class LoginApplication extends Application {
     public void init() throws Exception {
         loginInstance = this;
         UserManager userManager = UserManager.getInstance();
-        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/login-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getLoginFXML().getLocation());
         this.rootNode = fxmlLoader.load();
     }
 
@@ -52,7 +53,7 @@ public class LoginApplication extends Application {
         this.stage = stage;
     }
 
-    public void restart(Parent rootNode) {
+    public void restart() {
         this.stage.setScene(new Scene(rootNode));
         this.stage.show();
     }

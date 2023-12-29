@@ -1,6 +1,7 @@
 package it.unimol.diffusiontool.application;
 
 import it.unimol.diffusiontool.entities.User;
+import it.unimol.diffusiontool.properties.FXMLProperties;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,7 +13,7 @@ import java.io.IOException;
 public class DiffusionApplication extends Application {
     private Parent rootNode;
     private Stage stage;
-    private FXMLLoader fxmlLoader;
+    private FXMLLoader currentFXML;
     private static User user;
     private static DiffusionApplication toolInstance;
 
@@ -35,6 +36,10 @@ public class DiffusionApplication extends Application {
         return this.stage;
     }
 
+    public FXMLLoader getCurrentFXML() {
+        return currentFXML;
+    }
+
     public User getUser() {
         return user;
     }
@@ -47,14 +52,18 @@ public class DiffusionApplication extends Application {
         this.stage = stage;
     }
 
+    public void setCurrentFXML(FXMLLoader currentFXML) {
+        this.currentFXML = currentFXML;
+    }
+
     public void setUser(User user) {
         DiffusionApplication.user = user;
     }
 
     public void init() throws Exception {
         toolInstance = this;
-        this.fxmlLoader = new FXMLLoader(this.getClass().getResource("/app-home-view.fxml"));
-        this.rootNode = this.fxmlLoader.load();
+        currentFXML = new FXMLLoader(FXMLProperties.getInstance().getHomeFXML().getLocation());
+        this.rootNode = currentFXML.load();
     }
 
     public void start(Stage stage) {
@@ -64,13 +73,13 @@ public class DiffusionApplication extends Application {
         this.stage = stage;
     }
 
-    public void restart(Parent rootNode) {
+    public void restart() {
         this.stage.setScene(new Scene(rootNode));
         this.stage.show();
     }
 
     public void refresh() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/app-home-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getHomeFXML().getLocation());
         this.rootNode = fxmlLoader.load();
         this.start(this.stage);
     }

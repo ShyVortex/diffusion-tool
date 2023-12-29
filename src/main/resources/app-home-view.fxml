@@ -69,11 +69,7 @@
                <children>
                   <Button fx:id="profileButton" mnemonicParsing="false" onAction="#OnProfileClick" prefHeight="60.0" prefWidth="60.0">
                      <graphic>
-                        <ImageView fx:id="userImage" fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@default/new-user.png" />
-                           </image>
-                        </ImageView>
+                        <ImageView fx:id="homeUserImage" fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
                      </graphic>
                   </Button>
                </children>
