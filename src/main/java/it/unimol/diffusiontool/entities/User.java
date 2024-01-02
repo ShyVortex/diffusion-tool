@@ -27,6 +27,10 @@ public class User {
         this.upscImgsNum = 0;
     }
 
+    public static void free(User user) {
+        user = null;
+    }
+
     public String getId() {
         return this.id;
     }

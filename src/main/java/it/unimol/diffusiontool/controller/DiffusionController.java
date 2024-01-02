@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class DiffusionController {
     private final SimpleObjectProperty<Image> profilePicProperty = new SimpleObjectProperty<>();
@@ -82,6 +83,26 @@ public class DiffusionController {
     private Button passwordCancelButton;
     @FXML
     private Button passwordApplyButton;
+    @FXML
+    private Button pictureDefaultButton;
+    @FXML
+    private Button pictureChangeButton;
+    @FXML
+    private Button profileDeleteButton;
+    @FXML
+    private TextArea promptArea;
+    @FXML
+    private Button promptResetButton;
+    @FXML
+    private Button createButton;
+    @FXML
+    private Label processingLabel;
+    @FXML
+    private ImageView genImgPreview;
+    @FXML
+    private Button imageDeleteButton;
+    @FXML
+    private Button imageShowButton;
 
     private String getLoggedInUser() {
         return diffApp.getUser().getUsername();
@@ -133,6 +154,8 @@ public class DiffusionController {
             initializeHomeView();
         if (diffApp.getCurrentFXML().equals(FXMLProperties.getInstance().getProfileFXML()))
             initializeProfileView();
+        if (diffApp.getCurrentFXML().equals(FXMLProperties.getInstance().getGenerateFXML()))
+            initializeGenerateView();
     }
 
     private void initializeHomeView() {
@@ -150,6 +173,12 @@ public class DiffusionController {
         emailField.textProperty().bind(Bindings.createStringBinding(this::getUserEmail));
         birthdateField.textProperty().bind(Bindings.createStringBinding(this::getUserBirthdate));
         passwordField.textProperty().bind(Bindings.createStringBinding(this::getUserPassword));
+    }
+
+    private void initializeGenerateView() {
+        profileButton.setBackground(null);
+        profilePicProperty.set(diffApp.getUser().getProfilePic());
+        homeUserImage.imageProperty().bind(profilePicProperty);
     }
 
     @FXML
@@ -179,8 +208,11 @@ public class DiffusionController {
     }
 
     @FXML
-    private void OnGenerateClick() {
-
+    private void OnGenerateClick() throws IOException {
+        diffApp.setCurrentFXML(new FXMLLoader(FXMLProperties.getInstance().getGenerateFXML().getLocation()));
+        Parent rootNode = diffApp.getCurrentFXML().load();
+        diffApp.setRootNode(rootNode);
+        diffApp.restart();
     }
 
     @FXML
@@ -376,6 +408,16 @@ public class DiffusionController {
     }
 
     @FXML
+    private void OnPictureDefaultClick() {
+        User user = diffApp.getUser();
+        profileUserImage.imageProperty().unbind();
+        Image defaultPic = new Image("/default/new-user.png");
+        user.setProfilePic(defaultPic);
+        profilePicProperty.set(diffApp.getUser().getProfilePic());
+        profileUserImage.imageProperty().bind(profilePicProperty);
+    }
+
+    @FXML
     private void OnPictureChangeClick() {
         User user = diffApp.getUser();
         profileUserImage.imageProperty().unbind();
@@ -408,5 +450,41 @@ public class DiffusionController {
             invObjAlert.setContentText("The selected file is not an image. Please retry.");
             invObjAlert.showAndWait();
         }
+    }
+
+    @FXML
+    private void OnProfileDeleteClick() throws Exception {
+        Alert warning = new Alert(Alert.AlertType.CONFIRMATION);
+        warning.setHeaderText("WARNING: Are you sure?");
+        warning.setContentText("Your profile and all its data will be deleted. Do you wish to continue?");
+        Optional<ButtonType> result = warning.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            User user = diffApp.getUser();
+            UserManager userManager = UserManager.getInstance();
+            userManager.deleteByUsername(user.getUsername());
+            User.free(user);
+            OnLogOutClick();
+        }
+    }
+
+    @FXML
+    private void OnPromptResetClick() {
+        promptArea.setText("");
+    }
+
+    @FXML
+    private void OnCreateClick() {
+        processingLabel.setVisible(true);
+    }
+
+    @FXML
+    private void OnImageDeleteClick() {
+
+    }
+
+    @FXML
+    private void OnImageShowClick() {
+        
     }
 }

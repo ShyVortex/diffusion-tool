@@ -116,7 +116,9 @@
                </font>
             </Label>
             <ImageView fx:id="profileUserImage" fitHeight="65.0" fitWidth="65.0" layoutX="39.0" layoutY="652.0" pickOnBounds="true" preserveRatio="true" />
-            <Button fx:id="pictureChangeButton" layoutX="114.0" layoutY="610.0" mnemonicParsing="false" onAction="#OnPictureChangeClick" text="Change" />
+            <Button fx:id="pictureChangeButton" layoutX="207.0" layoutY="611.0" mnemonicParsing="false" onAction="#OnPictureChangeClick" text="Change" />
+            <Button fx:id="profileDeleteButton" layoutX="757.0" layoutY="732.0" mnemonicParsing="false" onAction="#OnProfileDeleteClick" text="DELETE YOUR PROFILE" textFill="RED" />
+            <Button fx:id="pictureDefaultButton" layoutX="118.0" layoutY="611.0" mnemonicParsing="false" onAction="#OnPictureDefaultClick" prefWidth="68.0" text="Default" />
          </children>
       </AnchorPane>
    </children>

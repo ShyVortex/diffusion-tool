@@ -74,6 +74,10 @@ public class UserManager {
         return user;
     }
 
+    public void deleteByUsername(String username) {
+        this.users.entrySet().removeIf(entry -> entry.getValue().getUsername().equals(username));
+    }
+
     public String toString() {
         StringBuilder result = new StringBuilder();
 

@@ -7,6 +7,7 @@ public class FXMLProperties {
     private FXMLLoader signupFXML;
     private FXMLLoader homeFXML;
     private FXMLLoader profileFXML;
+    private FXMLLoader generateFXML;
     private static FXMLProperties instance;
 
     public FXMLProperties() {
@@ -14,6 +15,7 @@ public class FXMLProperties {
         signupFXML = new FXMLLoader(this.getClass().getResource("/signup-view.fxml"));
         homeFXML = new FXMLLoader(this.getClass().getResource("/app-home-view.fxml"));
         profileFXML = new FXMLLoader(this.getClass().getResource("/app-profile-view.fxml"));
+        generateFXML = new FXMLLoader(this.getClass().getResource("/app-generate-view.fxml"));
     }
 
     public static FXMLProperties getInstance() {
@@ -37,5 +39,9 @@ public class FXMLProperties {
 
     public FXMLLoader getProfileFXML() {
         return profileFXML;
+    }
+
+    public FXMLLoader getGenerateFXML() {
+        return generateFXML;
     }
 }
