@@ -6,6 +6,7 @@ import it.unimol.diffusiontool.entities.User;
 import it.unimol.diffusiontool.entities.UserManager;
 import it.unimol.diffusiontool.exceptions.*;
 import it.unimol.diffusiontool.properties.FXMLProperties;
+import it.unimol.diffusiontool.properties.GeneralProperties;
 import it.unimol.diffusiontool.validators.BirthdateValidator;
 import it.unimol.diffusiontool.validators.EmailValidator;
 import it.unimol.diffusiontool.validators.UsernameValidator;
@@ -20,14 +21,14 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InvalidObjectException;
+import java.io.*;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public class DiffusionController {
     private final SimpleObjectProperty<Image> profilePicProperty = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<Image> generatedImgProperty = new SimpleObjectProperty<>();
     private final DiffusionApplication diffApp = DiffusionApplication.getToolInstance();
     @FXML
     private Label userLabel;
@@ -92,6 +93,8 @@ public class DiffusionController {
     @FXML
     private TextArea promptArea;
     @FXML
+    private TextField tagsField;
+    @FXML
     private Button promptResetButton;
     @FXML
     private Button createButton;
@@ -106,6 +109,18 @@ public class DiffusionController {
 
     private String getLoggedInUser() {
         return diffApp.getUser().getUsername();
+    }
+
+    private String getUserEmail() {
+        return diffApp.getUser().getEmail();
+    }
+
+    private String getUserBirthdate() {
+        return diffApp.getUser().getBirthDate().toString();
+    }
+
+    private String getUserPassword() {
+        return diffApp.getUser().getPassword();
     }
 
     private String countGeneratedImgs() {
@@ -125,16 +140,8 @@ public class DiffusionController {
         return startText + user.getUpscImgsNum() + endText;
     }
 
-    private String getUserEmail() {
-        return diffApp.getUser().getEmail();
-    }
-
-    private String getUserBirthdate() {
-        return diffApp.getUser().getBirthDate().toString();
-    }
-
-    private String getUserPassword() {
-        return diffApp.getUser().getPassword();
+    private String updateProcessingLabel() {
+        return "Preview";
     }
 
     private boolean isImageFile(File file) {
@@ -145,6 +152,69 @@ public class DiffusionController {
         } catch (Exception e) {
             return false; // If loading fails, it's not an image
         }
+    }
+
+    private String callPythonGenerate(String prompt) throws IOException, GenerationException {
+        String activateScriptPath = "venv/bin/python";
+        String pythonScriptPath = "src/main/python/it/unimol/diffusiontool/generate.py";
+        StringBuilder output = new StringBuilder();
+        StringBuilder errorOutput = new StringBuilder();
+
+        // Construct the command to execute
+        List<String> command = List.of (
+                activateScriptPath,      // Activate virtual environment
+                pythonScriptPath,        // Path to the Python script
+                prompt                  // Prompt argument
+        );
+
+        // Start the process
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        Process process = processBuilder.start();
+
+        // Capture and print the error stream
+        try (
+                InputStream inputStream = process.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader inputbufferedReader = new BufferedReader(inputStreamReader);
+                InputStream errorStream = process.getErrorStream();
+                InputStreamReader errorStreamReader = new InputStreamReader(errorStream);
+                BufferedReader errorBufferedReader = new BufferedReader(errorStreamReader)
+        ) {
+            String inputLine;
+            while ((inputLine = inputbufferedReader.readLine()) != null) {
+                output.append(inputLine).append("\n");
+            }
+
+            String errorLine;
+            while ((errorLine = errorBufferedReader.readLine()) != null) {
+                errorOutput.append(errorLine).append("\n");
+            }
+        }
+
+        // Wait for the process to finish
+        try {
+            int exitCode = process.waitFor();
+            System.out.println("Python script exited with code: " + exitCode);
+
+            if (exitCode == 0) {
+                // If there is no error, return the output as a String
+            /*
+                String absolutePath = output.toString();
+                String relativePath = absolutePath.replace(System.getProperty("user.dir") + "/", "");
+            */
+                System.out.println(errorOutput.toString().trim());
+                return output.toString().trim();
+            } else {
+                // If there is an error, print the error and throw an exception
+                System.err.println("Error output:\n" + errorOutput.toString().trim());
+                throw new GenerationException();
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return GeneralProperties.ERROR.getValue();
     }
 
     @FXML
@@ -471,11 +541,42 @@ public class DiffusionController {
     @FXML
     private void OnPromptResetClick() {
         promptArea.setText("");
+        tagsField.setText("");
     }
 
     @FXML
     private void OnCreateClick() {
         processingLabel.setVisible(true);
+
+        String prompt = promptArea.getText();
+        String tags = tagsField.getText();
+
+        try {
+            processingLabel.setVisible(true);
+            String fileName = callPythonGenerate(prompt);
+            if (fileName != null) {
+                processingLabel.textProperty().bind(Bindings.createStringBinding(this::updateProcessingLabel));
+                Image outImage = new Image(fileName);
+                generatedImgProperty.set(outImage);
+                genImgPreview.imageProperty().bind(generatedImgProperty);
+                imageDeleteButton.setVisible(true);
+                imageShowButton.setVisible(true);
+            }
+
+        } catch (GenerationException e) {
+            Alert genAlert = new Alert(Alert.AlertType.ERROR);
+            genAlert.setHeaderText("ERROR: Generation Failure");
+            genAlert.setContentText("Something went wrong in the image creation. Please retry");
+            genAlert.showAndWait();
+            processingLabel.setVisible(false);
+        } catch (Exception e) {
+            processingLabel.setVisible(false);
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("ERROR: Unexpected Failure");
+            alert.setContentText("Something went wrong. Please retry");
+            alert.showAndWait();
+        }
     }
 
     @FXML

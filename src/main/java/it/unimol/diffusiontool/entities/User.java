@@ -14,7 +14,7 @@ public class User {
     private String password;
     private LocalDate birthDate;
     private Image profilePic;
-    private Collection<GeneratedImage> generatedImages;
+    private Collection<Image> generatedImages;
     private int upscImgsNum;
 
     public User(String email, String username, String password, LocalDate birthDate) {
@@ -55,7 +55,7 @@ public class User {
         return this.profilePic;
     }
 
-    public Collection<GeneratedImage> getGeneratedImages() {
+    public Collection<Image> getGeneratedImages() {
         return this.generatedImages;
     }
 
@@ -85,7 +85,7 @@ public class User {
 
     public int countGeneratedImgs() {
         int num = 0;
-        for (GeneratedImage img : this.generatedImages)
+        for (Image img : this.generatedImages)
             num++;
 
         return num;

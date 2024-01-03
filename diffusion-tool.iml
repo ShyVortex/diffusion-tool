@@ -4,6 +4,9 @@
     <content url="file://$MODULE_DIR$" dumb="true">
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/python" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/result/generated" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/result/upscaled" type="java-resource" />
     </content>
   </component>
 </module>
