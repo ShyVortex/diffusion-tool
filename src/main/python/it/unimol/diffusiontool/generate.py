@@ -1,7 +1,10 @@
 import sys
 from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
+from PIL import Image
+from io import BytesIO
 import torch
 import os
+import base64
 
 
 def main():
@@ -28,8 +31,12 @@ def main():
     output_filepath = os.path.join(output_folder, output_filename)
     image.save(output_filepath)
 
-    # Print name of the saved image
-    print(output_filename)
+    # Encode the image as a base64 string
+    with open(output_filepath, "rb") as image_file:
+        encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+    # Print image as string
+    print(encoded_image)
 
 
 if __name__ == "__main__":

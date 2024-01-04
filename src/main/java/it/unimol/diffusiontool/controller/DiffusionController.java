@@ -14,6 +14,7 @@ import it.unimol.diffusiontool.validators.UsernameValidator;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,10 +24,12 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -252,8 +255,6 @@ public class DiffusionController {
         emailField.textProperty().bind(Bindings.createStringBinding(this::getUserEmail));
         birthdateField.textProperty().bind(Bindings.createStringBinding(this::getUserBirthdate));
         passwordField.textProperty().bind(Bindings.createStringBinding(this::getUserPassword));
-        String testStr = "20240104_155100";
-        Image test = new Image("generated_image_" + testStr + ".png");
     }
 
     private void initializeGenerateView() {
@@ -569,10 +570,10 @@ public class DiffusionController {
         try {
             processingThread.stop(processingThread);
             processingLabel.setVisible(true);
-            AtomicReference<String> fileName = new AtomicReference<>();
+            AtomicReference<String> base64EncodedImage = new AtomicReference<>();
             StoppableThread pyThread = new StoppableThread(() -> {
                 try {
-                    fileName.set(callPythonGenerate(prompt, formattedDate));
+                    base64EncodedImage.set(callPythonGenerate(prompt, formattedDate));
                     StoppableThread.currentThread().stop(StoppableThread.currentThread());
                 } catch (IOException | GenerationException e) {
                     throw new RuntimeException(e);
@@ -584,20 +585,22 @@ public class DiffusionController {
                 while (true) {
                     try {
                         sleep(1000);
-                        if (!pyThread.isAlive() && fileName.toString() != null) {
+                        if (!pyThread.isAlive() && base64EncodedImage.toString() != null) {
                             Platform.runLater(() -> {
                                 processingLabel.textProperty().bind(Bindings.createStringBinding(
                                         DiffusionController.this::updateProcessingLabel));
-                                String test = "generated_image_" + formattedDate + ".png";
-                                System.out.println(fileName.get());
-                                System.out.println(test);
-                                System.out.println(test.equals(fileName.get()));
-                                Image outImage = new Image("generated_image_" + formattedDate + ".png");
-                                generatedImgProperty.set(outImage);
-                                genImgPreview.imageProperty().bind(generatedImgProperty);
-                                imageDeleteButton.setVisible(true);
-                                imageShowButton.setVisible(true);
-                                Platform.exit();
+                                byte[] decodedBytes = Base64.getDecoder().decode(base64EncodedImage.get());
+                                ByteArrayInputStream bis = new ByteArrayInputStream(decodedBytes);
+                                Image outImage;
+                                try {
+                                    outImage = SwingFXUtils.toFXImage(ImageIO.read(bis), null);
+                                    generatedImgProperty.set(outImage);
+                                    genImgPreview.imageProperty().bind(generatedImgProperty);
+                                    imageDeleteButton.setVisible(true);
+                                    imageShowButton.setVisible(true);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
                             });
                             break;
                         }
