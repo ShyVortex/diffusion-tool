@@ -8,6 +8,7 @@
     <option name="description" value="" />
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="FrameworkDetectionExcludesConfiguration" detection-enabled="false" />
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>

@@ -1,18 +1,18 @@
 import sys
 from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
 import torch
-import datetime
 import os
 
 
 def main():
     # Check if the correct number of command-line arguments is provided
-    if len(sys.argv) != 2:
-        print("Usage: python generate.py <prompt>")
+    if len(sys.argv) != 3:
+        print("Usage: python generate.py <prompt> <date>")
         sys.exit(1)
 
-    # Get the prompt from the command-line arguments passed from Java
+    # Get the prompt and date from the command-line arguments passed from Java
     prompt = sys.argv[1]
+    date = sys.argv[2]
 
     # Model initialization and processing
     repo_id = "stabilityai/stable-diffusion-2-base"
@@ -24,8 +24,7 @@ def main():
     with torch.cuda.amp.autocast():
         image = pipe(prompt, num_inference_steps=25).images[0]
     output_folder = os.path.abspath("result/generated")
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_filename = f"generated_image_{timestamp}.png"
+    output_filename = f"generated_image_{date}.png"
     output_filepath = os.path.join(output_folder, output_filename)
     image.save(output_filepath)
 

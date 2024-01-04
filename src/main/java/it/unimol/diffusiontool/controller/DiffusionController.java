@@ -7,9 +7,11 @@ import it.unimol.diffusiontool.entities.UserManager;
 import it.unimol.diffusiontool.exceptions.*;
 import it.unimol.diffusiontool.properties.FXMLProperties;
 import it.unimol.diffusiontool.properties.GeneralProperties;
+import it.unimol.diffusiontool.threads.StoppableThread;
 import it.unimol.diffusiontool.validators.BirthdateValidator;
 import it.unimol.diffusiontool.validators.EmailValidator;
 import it.unimol.diffusiontool.validators.UsernameValidator;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -23,13 +25,19 @@ import javafx.stage.Stage;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static java.lang.Thread.sleep;
 
 public class DiffusionController {
     private final SimpleObjectProperty<Image> profilePicProperty = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<Image> generatedImgProperty = new SimpleObjectProperty<>();
     private final DiffusionApplication diffApp = DiffusionApplication.getToolInstance();
+    private String formattedDate;
     @FXML
     private Label userLabel;
     @FXML
@@ -154,7 +162,7 @@ public class DiffusionController {
         }
     }
 
-    private String callPythonGenerate(String prompt) throws IOException, GenerationException {
+    private String callPythonGenerate(String prompt, String date) throws IOException, GenerationException {
         String activateScriptPath = "venv/bin/python";
         String pythonScriptPath = "src/main/python/it/unimol/diffusiontool/generate.py";
         StringBuilder output = new StringBuilder();
@@ -164,7 +172,8 @@ public class DiffusionController {
         List<String> command = List.of (
                 activateScriptPath,      // Activate virtual environment
                 pythonScriptPath,        // Path to the Python script
-                prompt                  // Prompt argument
+                prompt,                  // Prompt argument
+                date                    // Date argument
         );
 
         // Start the process
@@ -243,6 +252,8 @@ public class DiffusionController {
         emailField.textProperty().bind(Bindings.createStringBinding(this::getUserEmail));
         birthdateField.textProperty().bind(Bindings.createStringBinding(this::getUserBirthdate));
         passwordField.textProperty().bind(Bindings.createStringBinding(this::getUserPassword));
+        String testStr = "20240104_155100";
+        Image test = new Image("generated_image_" + testStr + ".png");
     }
 
     private void initializeGenerateView() {
@@ -546,36 +557,64 @@ public class DiffusionController {
 
     @FXML
     private void OnCreateClick() {
-        processingLabel.setVisible(true);
-
         String prompt = promptArea.getText();
         String tags = tagsField.getText();
+        LocalDateTime currentDate = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        formattedDate = currentDate.format(formatter);
+
+        StoppableThread processingThread = new StoppableThread(() -> processingLabel.setVisible(true));
+        processingThread.start(processingThread);
 
         try {
+            processingThread.stop(processingThread);
             processingLabel.setVisible(true);
-            String fileName = callPythonGenerate(prompt);
-            if (fileName != null) {
-                processingLabel.textProperty().bind(Bindings.createStringBinding(this::updateProcessingLabel));
-                Image outImage = new Image(fileName);
-                generatedImgProperty.set(outImage);
-                genImgPreview.imageProperty().bind(generatedImgProperty);
-                imageDeleteButton.setVisible(true);
-                imageShowButton.setVisible(true);
-            }
+            AtomicReference<String> fileName = new AtomicReference<>();
+            StoppableThread pyThread = new StoppableThread(() -> {
+                try {
+                    fileName.set(callPythonGenerate(prompt, formattedDate));
+                    StoppableThread.currentThread().stop(StoppableThread.currentThread());
+                } catch (IOException | GenerationException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            pyThread.start(pyThread);
 
-        } catch (GenerationException e) {
+            StoppableThread updateThread = new StoppableThread(() -> {
+                while (true) {
+                    try {
+                        sleep(1000);
+                        if (!pyThread.isAlive() && fileName.toString() != null) {
+                            Platform.runLater(() -> {
+                                processingLabel.textProperty().bind(Bindings.createStringBinding(
+                                        DiffusionController.this::updateProcessingLabel));
+                                String test = "generated_image_" + formattedDate + ".png";
+                                System.out.println(fileName.get());
+                                System.out.println(test);
+                                System.out.println(test.equals(fileName.get()));
+                                Image outImage = new Image("generated_image_" + formattedDate + ".png");
+                                generatedImgProperty.set(outImage);
+                                genImgPreview.imageProperty().bind(generatedImgProperty);
+                                imageDeleteButton.setVisible(true);
+                                imageShowButton.setVisible(true);
+                                Platform.exit();
+                            });
+                            break;
+                        }
+                    } catch (InterruptedException e) {
+                        processingLabel.setVisible(false);
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+            updateThread.start(updateThread);
+
+        } catch (Exception e) {
             Alert genAlert = new Alert(Alert.AlertType.ERROR);
             genAlert.setHeaderText("ERROR: Generation Failure");
             genAlert.setContentText("Something went wrong in the image creation. Please retry");
             genAlert.showAndWait();
             processingLabel.setVisible(false);
-        } catch (Exception e) {
-            processingLabel.setVisible(false);
-            e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setHeaderText("ERROR: Unexpected Failure");
-            alert.setContentText("Something went wrong. Please retry");
-            alert.showAndWait();
         }
     }
 
