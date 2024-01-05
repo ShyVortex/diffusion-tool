@@ -1,45 +1,53 @@
 package it.unimol.diffusiontool.application;
 
-import it.unimol.diffusiontool.entities.UserManager;
 import it.unimol.diffusiontool.properties.FXMLProperties;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-public class LoginApplication extends Application {
+public class ViewerApplication extends Application {
+    private Image exportedImg;
     private Parent rootNode;
     private Stage stage;
-    private static LoginApplication instance;
+    private static ViewerApplication instance;
+
+    public ViewerApplication() {
+    }
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    public static LoginApplication getInstance() {
+    public static ViewerApplication getInstance() {
         return instance;
     }
 
+    public Image getExportedImage() {
+        return exportedImg;
+    }
+
     public Parent getRootNode() {
-        return this.rootNode;
+        return rootNode;
     }
 
     public Stage getStage() {
-        return this.stage;
+        return stage;
+    }
+
+    public void setExportedImage(Image exportedImg) {
+        this.exportedImg = exportedImg;
     }
 
     public void setRootNode(Parent rootNode) {
         this.rootNode = rootNode;
     }
 
-    public void setRememberSession(boolean rememberSession) {
-    }
-
     public void init() throws Exception {
         instance = this;
-        UserManager userManager = UserManager.getInstance();
-        FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getLoginFXML().getLocation());
+        FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getViewerFXML().getLocation());
         this.rootNode = fxmlLoader.load();
     }
 
@@ -48,10 +56,5 @@ public class LoginApplication extends Application {
         stage.setResizable(false);
         stage.show();
         this.stage = stage;
-    }
-
-    public void restart() {
-        this.stage.setScene(new Scene(rootNode));
-        this.stage.show();
     }
 }

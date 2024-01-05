@@ -49,13 +49,10 @@ public class LoginController {
     private Button confirmSignUpButton;
     private UserManager userManager = UserManager.getInstance();
 
-    public LoginController() {
-    }
-
     @FXML
     private void onSignInClick() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getLoginFXML().getLocation());
-        LoginApplication loginApplication = LoginApplication.getLoginInstance();
+        LoginApplication loginApplication = LoginApplication.getInstance();
         Parent rootNode = fxmlLoader.load();
         loginApplication.setRootNode(rootNode);
         loginApplication.restart();
@@ -64,7 +61,7 @@ public class LoginController {
     @FXML
     private void onSignUpClick() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getSignupFXML().getLocation());
-        LoginApplication loginApplication = LoginApplication.getLoginInstance();
+        LoginApplication loginApplication = LoginApplication.getInstance();
         Parent rootNode = fxmlLoader.load();
         loginApplication.setRootNode(rootNode);
         loginApplication.restart();
@@ -72,7 +69,7 @@ public class LoginController {
 
     @FXML
     private void onRememberMeClick() {
-        LoginApplication loginApplication = LoginApplication.getLoginInstance();
+        LoginApplication loginApplication = LoginApplication.getInstance();
         loginApplication.setRememberSession(true);
     }
 
@@ -115,6 +112,7 @@ public class LoginController {
         String email = this.emailField.getText();
         String username = this.usernameField.getText();
         String password = this.passwordField.getText();
+        String editorText = this.birthdatePicker.getEditor().getText();
         LocalDate birthDate = this.birthdatePicker.getValue();
         Optional<User> duplicated = Optional.ofNullable(this.userManager.findByUsername(username));
         EmailValidator emailValidator = EmailValidator.getInstance();
@@ -122,16 +120,22 @@ public class LoginController {
         BirthdateValidator birthdateValidator = BirthdateValidator.getInstance();
 
         try {
-            if (email.isEmpty() || username.isEmpty() || password.isEmpty() || birthDate == null)
+            if (email.isEmpty() || username.isEmpty() || password.isEmpty() || editorText.isEmpty())
                 throw new BlankFieldException();
             if (!emailValidator.isValid(email))
                 throw new InvalidEmailException();
             if (!usernameValidator.isValid(username))
                 throw new InvalidUsernameException();
+            if (birthDate == null) {
+                birthDate = LocalDate.parse(editorText);
+                if (!birthdateValidator.isValid(birthDate))
+                    throw new InvalidDateException();
+            }
             if (!birthdateValidator.isValid(birthDate))
                 throw new InvalidDateException();
             if (duplicated.isPresent())
                 throw new DuplicatedUserException();
+
 
             User user = new User(email, username, password, birthDate);
             this.userManager.addUser(user);

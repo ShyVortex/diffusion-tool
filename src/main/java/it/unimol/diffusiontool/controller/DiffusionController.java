@@ -1,7 +1,9 @@
 package it.unimol.diffusiontool.controller;
 
+import com.google.common.collect.Iterables;
 import it.unimol.diffusiontool.application.DiffusionApplication;
 import it.unimol.diffusiontool.application.LoginApplication;
+import it.unimol.diffusiontool.application.ViewerApplication;
 import it.unimol.diffusiontool.entities.User;
 import it.unimol.diffusiontool.entities.UserManager;
 import it.unimol.diffusiontool.exceptions.*;
@@ -138,7 +140,12 @@ public class DiffusionController {
         User user = diffApp.getUser();
         int num = user.countGeneratedImgs();
         String startText = "You have generated ";
-        String endText = " images so far.";
+        String endText;
+
+        if (num == 1)
+            endText = " image so far.";
+        else
+            endText = " images so far.";
 
         return startText + num + endText;
     }
@@ -266,7 +273,7 @@ public class DiffusionController {
     @FXML
     private void OnLogOutClick() throws Exception {
         diffApp.setUser(null);
-        LoginApplication loginApplication = LoginApplication.getLoginInstance();
+        LoginApplication loginApplication = LoginApplication.getInstance();
         Stage stage = (Stage) logoutButton.getScene().getWindow();
         stage.close();
         loginApplication.init();
@@ -426,11 +433,19 @@ public class DiffusionController {
     @FXML
     private void OnBirthdateApplyClick() {
         User user = diffApp.getUser();
+        String editorText = birthdatePicker.getEditor().getText();
         LocalDate newBirthdate = birthdatePicker.getValue();
 
         try {
+            if (editorText.isEmpty())
+                throw new BlankFieldException();
             if (user.getBirthDate().equals(newBirthdate))
                 throw new InvalidDateException();
+            if (newBirthdate == null) {
+                newBirthdate = LocalDate.parse(editorText);
+                if (!BirthdateValidator.getInstance().isValid(newBirthdate))
+                    throw new InvalidDateException();
+            }
             if (BirthdateValidator.getInstance().isValid(newBirthdate))
                 user.setBirthDate(newBirthdate);
             else
@@ -442,6 +457,11 @@ public class DiffusionController {
             birthdateCancelButton.setVisible(false);
             birthdateApplyButton.setVisible(false);
 
+        } catch (BlankFieldException e) {
+            Alert blankFieldAlert = new Alert(Alert.AlertType.ERROR);
+            blankFieldAlert.setHeaderText("ERROR: Blank field detected");
+            blankFieldAlert.setContentText("You have left the date field empty. Please insert one.");
+            blankFieldAlert.showAndWait();
         } catch (InvalidDateException e) {
             Alert invDateAlert = new Alert(Alert.AlertType.ERROR);
             invDateAlert.setHeaderText("ERROR: Invalid Birthdate");
@@ -560,74 +580,117 @@ public class DiffusionController {
     private void OnCreateClick() {
         String prompt = promptArea.getText();
         String tags = tagsField.getText();
-        LocalDateTime currentDate = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-        formattedDate = currentDate.format(formatter);
-
-        StoppableThread processingThread = new StoppableThread(() -> processingLabel.setVisible(true));
-        processingThread.start(processingThread);
 
         try {
-            processingThread.stop(processingThread);
-            processingLabel.setVisible(true);
-            AtomicReference<String> base64EncodedImage = new AtomicReference<>();
-            StoppableThread pyThread = new StoppableThread(() -> {
-                try {
-                    base64EncodedImage.set(callPythonGenerate(prompt, formattedDate));
-                    StoppableThread.currentThread().stop(StoppableThread.currentThread());
-                } catch (IOException | GenerationException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            pyThread.start(pyThread);
+            if (prompt.isEmpty())
+                throw new BlankFieldException();
 
-            StoppableThread updateThread = new StoppableThread(() -> {
-                while (true) {
+            LocalDateTime currentDate = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+            formattedDate = currentDate.format(formatter);
+
+            StoppableThread processingThread = new StoppableThread(() -> processingLabel.setVisible(true));
+            processingThread.start();
+
+            try {
+                processingThread.stop(processingThread);
+                processingLabel.setVisible(true);
+                AtomicReference<String> base64EncodedImage = new AtomicReference<>();
+                StoppableThread pyThread = new StoppableThread(() -> {
                     try {
-                        sleep(1000);
-                        if (!pyThread.isAlive() && base64EncodedImage.toString() != null) {
-                            Platform.runLater(() -> {
-                                processingLabel.textProperty().bind(Bindings.createStringBinding(
-                                        DiffusionController.this::updateProcessingLabel));
-                                byte[] decodedBytes = Base64.getDecoder().decode(base64EncodedImage.get());
-                                ByteArrayInputStream bis = new ByteArrayInputStream(decodedBytes);
-                                Image outImage;
-                                try {
-                                    outImage = SwingFXUtils.toFXImage(ImageIO.read(bis), null);
-                                    generatedImgProperty.set(outImage);
-                                    genImgPreview.imageProperty().bind(generatedImgProperty);
-                                    imageDeleteButton.setVisible(true);
-                                    imageShowButton.setVisible(true);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
-                            break;
-                        }
-                    } catch (InterruptedException e) {
-                        processingLabel.setVisible(false);
+                        base64EncodedImage.set(callPythonGenerate(prompt, formattedDate));
+                        StoppableThread.currentThread().stop(StoppableThread.currentThread());
+                    } catch (IOException | GenerationException e) {
                         throw new RuntimeException(e);
                     }
-                }
-            });
-            updateThread.start(updateThread);
+                });
+                pyThread.start();
 
-        } catch (Exception e) {
-            Alert genAlert = new Alert(Alert.AlertType.ERROR);
-            genAlert.setHeaderText("ERROR: Generation Failure");
-            genAlert.setContentText("Something went wrong in the image creation. Please retry");
-            genAlert.showAndWait();
-            processingLabel.setVisible(false);
+                StoppableThread updateThread = new StoppableThread(() -> {
+                    while (true) {
+                        try {
+                            sleep(1000);
+                            if (!pyThread.isAlive() && base64EncodedImage.toString() != null) {
+                                Platform.runLater(() -> {
+                                    processingLabel.textProperty().bind(Bindings.createStringBinding(
+                                            DiffusionController.this::updateProcessingLabel));
+                                    byte[] decodedBytes = Base64.getDecoder().decode(base64EncodedImage.get());
+                                    ByteArrayInputStream bis = new ByteArrayInputStream(decodedBytes);
+                                    Image outImage;
+                                    try {
+                                        outImage = SwingFXUtils.toFXImage(ImageIO.read(bis), null);
+                                        generatedImgProperty.set(outImage);
+                                        genImgPreview.imageProperty().bind(generatedImgProperty);
+                                        User user = diffApp.getUser();
+                                        user.addGeneratedImage(outImage);
+                                        imageDeleteButton.setVisible(true);
+                                        imageShowButton.setVisible(true);
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                });
+                                break;
+                            }
+                        } catch (InterruptedException e) {
+                            processingLabel.setVisible(false);
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+                updateThread.start();
+
+            } catch (Exception e) {
+                Alert genAlert = new Alert(Alert.AlertType.ERROR);
+                genAlert.setHeaderText("ERROR: Generation Failure");
+                genAlert.setContentText("Something went wrong in the image creation. Please retry");
+                genAlert.showAndWait();
+                processingLabel.setVisible(false);
+            }
+
+        } catch (BlankFieldException e) {
+            Alert blankFieldAlert = new Alert(Alert.AlertType.ERROR);
+            blankFieldAlert.setHeaderText("ERROR: Blank field detected");
+            blankFieldAlert.setContentText("You have left the prompt field empty. Please insert it.");
+            blankFieldAlert.showAndWait();
         }
     }
 
     @FXML
-    private void OnImageDeleteClick() {
+    private void OnImageDeleteClick() throws IOException {
+        User user = diffApp.getUser();
+        Image image = Iterables.getLast(user.getGeneratedImages());
+        File imageFile = new File(String.valueOf(image));
+        user.getGeneratedImages().removeIf(x -> x.equals(image));
+        boolean isDeleted = imageFile.delete();
+        try {
+            if (isDeleted) {
+                processingLabel.textProperty().unbind();
+                processingLabel.setVisible(false);
+                genImgPreview.imageProperty().unbind();
+                genImgPreview.setVisible(false);
+                imageDeleteButton.setVisible(false);
+                imageShowButton.setVisible(false);
+                OnPromptResetClick();
+            } else
+                throw new FileNotFoundException();
 
+        } catch (FileNotFoundException e) {
+            Alert FNFAlert = new Alert(Alert.AlertType.ERROR);
+            FNFAlert.setHeaderText("ERROR: File not found");
+            FNFAlert.setContentText("An error has occurred and the image file can't be found. \n" +
+                    "You can search it in the folder 'result/generated/' and delete that for yourself.");
+            FNFAlert.showAndWait();
+            OnGenerateClick();
+        }
     }
 
     @FXML
-    private void OnImageShowClick() {
-        
+    private void OnImageShowClick() throws Exception {
+        ViewerApplication viewerApp = new ViewerApplication();
+        Image image = Iterables.getLast(diffApp.getUser().getGeneratedImages());
+
+        viewerApp.setExportedImage(image);
+        viewerApp.init();
+        viewerApp.start(new Stage());
     }
 }

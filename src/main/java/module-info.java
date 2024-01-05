@@ -10,6 +10,7 @@ module it.unimol.diffusiontool {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires java.desktop;
+    requires com.google.common;
 
     opens it.unimol.diffusiontool to javafx.fxml;
     exports it.unimol.diffusiontool;

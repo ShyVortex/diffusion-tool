@@ -15,12 +15,13 @@ public class BirthdateValidator {
     }
 
     public boolean isValid(LocalDate date) {
-        if (date.isEqual(this.currentDate)) {
+        if (date == null)
             return false;
-        } else if (date.isAfter(this.currentDate)) {
+        if (date.isEqual(this.currentDate))
             return false;
-        } else {
-            return ChronoUnit.DAYS.between(date, this.currentDate) > 365L;
-        }
+        if (date.isAfter(this.currentDate))
+            return false;
+
+        return ChronoUnit.DAYS.between(date, this.currentDate) > 365L;
     }
 }

@@ -64,17 +64,6 @@ public class StoppableThread extends Thread implements Stoppable {
     }
 
     /**
-     * It allows for the execution of a {@link StoppableThread} thread and sets its execution flag to {@code true}.
-     *
-     * @param thread Thread to execute.
-     */
-    @Override
-    public void start(StoppableThread thread) {
-        thread.start();
-        thread.running.set(true);
-    }
-
-    /**
      * It allows for the termination of a {@link StoppableThread} thread and sets its execution flag to {@code false}.
      *
      * @param thread Thread to terminate.

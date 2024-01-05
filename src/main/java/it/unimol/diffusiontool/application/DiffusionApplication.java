@@ -8,17 +8,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
 public class DiffusionApplication extends Application {
     private Parent rootNode;
     private Stage stage;
     private FXMLLoader currentFXML;
     private static User user;
     private static DiffusionApplication toolInstance;
-
-    public DiffusionApplication() {
-    }
 
     public static void main(String[] args) {
         launch(args);
@@ -76,11 +71,5 @@ public class DiffusionApplication extends Application {
     public void restart() {
         this.stage.setScene(new Scene(rootNode));
         this.stage.show();
-    }
-
-    public void refresh() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getHomeFXML().getLocation());
-        this.rootNode = fxmlLoader.load();
-        this.start(this.stage);
     }
 }

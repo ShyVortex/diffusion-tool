@@ -9,27 +9,28 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="575.0" prefWidth="430.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unimol.diffusiontool.controller.LoginController">
-   <children>
-      <AnchorPane prefHeight="73.0" prefWidth="430.0">
-         <children>
-            <Button fx:id="signInButton" layoutX="42.0" layoutY="25.0" mnemonicParsing="false" onAction="#onSignInClick" text="SIGN IN" />
-            <Button fx:id="signUpButton" layoutX="141.0" layoutY="25.0" mnemonicParsing="false" onAction="#onSignUpClick" text="SIGN UP" />
-         </children>
-      </AnchorPane>
-      <AnchorPane prefHeight="507.0" prefWidth="430.0">
-         <children>
-            <Label fx:id="usernameLabel" layoutX="49.0" layoutY="47.0" text="USERNAME" />
-            <TextField fx:id="usernameField" layoutX="49.0" layoutY="72.0" prefHeight="24.0" prefWidth="314.0" />
-            <Label fx:id="passwordLabel" layoutX="49.0" layoutY="227.0" text="PASSWORD" />
-            <CheckBox fx:id="rememberMeCheck" layoutX="50.0" layoutY="319.0" mnemonicParsing="false" onAction="#onRememberMeClick" text="REMEMBER ME" />
-            <Button fx:id="confirmSignUpButton" layoutX="171.0" layoutY="403.0" mnemonicParsing="false" onAction="#onConfirmSignUpClick" text="SIGN UP" />
-            <Label fx:id="emailLabel" layoutX="49.0" layoutY="168.0" text="EMAIL" />
-            <TextField fx:id="emailField" layoutX="49.0" layoutY="191.0" prefHeight="24.0" prefWidth="314.0" />
-            <Label fx:id="birthdateLabel" layoutX="49.0" layoutY="108.0" text="BIRTHDATE" />
-            <DatePicker fx:id="birthdatePicker" layoutX="49.0" layoutY="131.0" prefHeight="24.0" prefWidth="314.0" />
-            <PasswordField fx:id="passwordField" layoutX="49.0" layoutY="249.0" prefHeight="24.0" prefWidth="314.0" />
-         </children>
-      </AnchorPane>
-   </children>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="575.0"
+      prefWidth="430.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="it.unimol.diffusiontool.controller.LoginController">
+
+   <AnchorPane prefHeight="73.0" prefWidth="430.0">
+      <Button fx:id="signInButton" layoutX="42.0" layoutY="25.0" mnemonicParsing="false" onAction="#onSignInClick"
+              text="SIGN IN"/>
+      <Button fx:id="signUpButton" layoutX="141.0" layoutY="25.0" mnemonicParsing="false" onAction="#onSignUpClick"
+              text="SIGN UP"/>
+   </AnchorPane>
+   <AnchorPane prefHeight="507.0" prefWidth="430.0">
+      <Label fx:id="usernameLabel" layoutX="49.0" layoutY="47.0" text="USERNAME"/>
+      <TextField fx:id="usernameField" layoutX="49.0" layoutY="72.0" prefHeight="24.0" prefWidth="314.0"/>
+      <Label fx:id="passwordLabel" layoutX="49.0" layoutY="227.0" text="PASSWORD"/>
+      <CheckBox fx:id="rememberMeCheck" layoutX="50.0" layoutY="319.0" mnemonicParsing="false"
+                onAction="#onRememberMeClick" text="REMEMBER ME"/>
+      <Button fx:id="confirmSignUpButton" layoutX="171.0" layoutY="403.0" mnemonicParsing="false"
+              onAction="#onConfirmSignUpClick" text="SIGN UP"/>
+      <Label fx:id="emailLabel" layoutX="49.0" layoutY="168.0" text="EMAIL"/>
+      <TextField fx:id="emailField" layoutX="49.0" layoutY="191.0" prefHeight="24.0" prefWidth="314.0"/>
+      <Label fx:id="birthdateLabel" layoutX="49.0" layoutY="108.0" text="BIRTHDATE (yyyy-MM-dd)"/>
+      <DatePicker fx:id="birthdatePicker" layoutX="49.0" layoutY="131.0" prefHeight="24.0" prefWidth="314.0"/>
+      <PasswordField fx:id="passwordField" layoutX="49.0" layoutY="249.0" prefHeight="24.0" prefWidth="314.0"/>
+   </AnchorPane>
 </VBox>

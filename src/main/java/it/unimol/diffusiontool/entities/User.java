@@ -91,6 +91,10 @@ public class User {
         return num;
     }
 
+    public void addGeneratedImage(Image image) {
+        this.generatedImages.add(image);
+    }
+
     public String toString() {
         return "User {\n id='" + this.id + "',\n email='" + this.email + "',\n username='"
                 + this.username + "',\n password='" + this.password + "',\n birthDate="

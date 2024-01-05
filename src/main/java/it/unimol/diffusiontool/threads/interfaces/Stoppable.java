@@ -12,13 +12,6 @@ import it.unimol.diffusiontool.threads.StoppableThread;
 
 public interface Stoppable {
     /**
-     * It defines the start of execution of a {@link StoppableThread}.
-     *
-     * @param thread The thread to execute.
-     */
-    void start(StoppableThread thread);
-
-    /**
      * It defines the stop of execution of a {@link StoppableThread}.
      *
      * @param thread The thread to stop.

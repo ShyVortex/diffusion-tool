@@ -13,113 +13,124 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unimol.diffusiontool.controller.DiffusionController">
-   <children>
-      <VBox prefHeight="800.0" prefWidth="300.0">
-         <children>
-            <AnchorPane prefHeight="800.0" prefWidth="300.0">
-               <children>
-                  <Pane layoutY="25.0" prefHeight="100.0" prefWidth="300.0">
-                     <children>
-                        <Label layoutX="14.0" layoutY="21.0" text="You are logged in as" />
-                        <Label fx:id="userLabel" layoutX="45.0" layoutY="40.0" />
-                        <Button fx:id="logoutButton" layoutX="224.0" layoutY="62.0" mnemonicParsing="false" onAction="#OnLogOutClick" text="Logout" />
-                     </children>
-                  </Pane>
-                  <Button fx:id="homeButton" layoutY="200.0" mnemonicParsing="false" onAction="#OnHomeClick" prefHeight="100.0" prefWidth="300.0" text="Home">
-                     <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@tool/home.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="generateButton" layoutY="350.0" mnemonicParsing="false" onAction="#OnGenerateClick" prefHeight="100.0" prefWidth="300.0" text="Generate">
-                     <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@tool/generate.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="upscaleButton" layoutY="500.0" mnemonicParsing="false" onAction="#OnUpscaleClick" prefHeight="100.0" prefWidth="300.0" text="Upscale">
-                     <graphic>
-                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@tool/resize.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <ImageView fitHeight="65.0" fitWidth="65.0" layoutX="45.0" layoutY="675.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@tool/stable-diffusion-icon.png" />
-                     </image>
-                  </ImageView>
-                  <Label layoutX="129.0" layoutY="698.0" text="Stable Diffusion">
-                     <font>
-                        <Font size="14.0" />
-                     </font></Label>
-               </children>
-            </AnchorPane>
-         </children>
-      </VBox>
-      <AnchorPane prefHeight="800.0" prefWidth="1000.0">
-         <children>
-            <Label layoutX="42.0" layoutY="78.0" text="Profile Info">
-               <font>
-                  <Font name="System Bold" size="36.0" />
-               </font>
-            </Label>
-            <Label layoutX="42.0" layoutY="162.0" text="Username">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="usernameField" editable="false" layoutX="42.0" layoutY="192.0" prefHeight="24.0" prefWidth="882.0" />
-            <Button fx:id="usernameChangeButton" layoutX="139.0" layoutY="158.0" mnemonicParsing="false" onAction="#OnUsernameChangeClick" text="Change" />
-            <Button fx:id="usernameCancelButton" layoutX="42.0" layoutY="229.0" mnemonicParsing="false" onAction="#OnUsernameCancelClick" text="Cancel" textFill="RED" visible="false" />
-            <Button fx:id="usernameApplyButton" layoutX="862.0" layoutY="229.0" mnemonicParsing="false" onAction="#OnUsernameApplyClick" text="Apply" textFill="#078300" visible="false" />
-            <Label layoutX="42.0" layoutY="275.0" text="Email">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="emailField" editable="false" layoutX="42.0" layoutY="305.0" prefHeight="26.0" prefWidth="882.0" />
-            <Button fx:id="emailChangeButton" layoutX="109.0" layoutY="271.0" mnemonicParsing="false" onAction="#OnEmailChangeClick" text="Change" />
-            <Button fx:id="emailCancelButton" layoutX="42.0" layoutY="342.0" mnemonicParsing="false" onAction="#OnEmailCancelClick" text="Cancel" textFill="RED" visible="false" />
-            <Button fx:id="emailApplyButton" layoutX="870.0" layoutY="342.0" mnemonicParsing="false" onAction="#OnEmailApplyClick" text="Apply" textFill="#078300" visible="false" />
-            <Label layoutX="42.0" layoutY="388.0" text="Birthdate">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="birthdateField" editable="false" layoutX="42.0" layoutY="418.0" prefHeight="26.0" prefWidth="882.0" />
-            <Button fx:id="birthdateChangeButton" layoutX="139.0" layoutY="384.0" mnemonicParsing="false" onAction="#OnBirthdateChangeClick" text="Change" />
-            <DatePicker fx:id="birthdatePicker" layoutX="282.0" layoutY="384.0" visible="false" />
-            <Button fx:id="birthdateCancelButton" layoutX="483.0" layoutY="384.0" mnemonicParsing="false" onAction="#OnBirthdateCancelClick" text="Cancel" textFill="RED" visible="false" />
-            <Button fx:id="birthdateApplyButton" layoutX="554.0" layoutY="384.0" mnemonicParsing="false" onAction="#OnBirthdateApplyClick" text="Apply" textFill="#078300" visible="false" />
-            <Label layoutX="42.0" layoutY="501.0" text="Password">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
-            <Button fx:id="passwordChangeButton" layoutX="138.0" layoutY="497.0" mnemonicParsing="false" onAction="#OnPasswordChangeClick" text="Change" />
-            <Button fx:id="passwordCancelButton" layoutX="42.0" layoutY="568.0" mnemonicParsing="false" onAction="#OnPasswordCancelClick" text="Cancel" textFill="RED" visible="false" />
-            <Button fx:id="passwordApplyButton" layoutX="870.0" layoutY="568.0" mnemonicParsing="false" onAction="#OnPasswordApplyClick" text="Apply" textFill="#078300" visible="false" />
-            <PasswordField fx:id="passwordField" editable="false" layoutX="42.0" layoutY="531.0" prefHeight="26.0" prefWidth="882.0" />
-            <Label layoutX="39.0" layoutY="614.0" text="Picture">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
-            <ImageView fx:id="profileUserImage" fitHeight="65.0" fitWidth="65.0" layoutX="39.0" layoutY="652.0" pickOnBounds="true" preserveRatio="true" />
-            <Button fx:id="pictureChangeButton" layoutX="207.0" layoutY="611.0" mnemonicParsing="false" onAction="#OnPictureChangeClick" text="Change" />
-            <Button fx:id="profileDeleteButton" layoutX="757.0" layoutY="732.0" mnemonicParsing="false" onAction="#OnProfileDeleteClick" text="DELETE YOUR PROFILE" textFill="RED" />
-            <Button fx:id="pictureDefaultButton" layoutX="118.0" layoutY="611.0" mnemonicParsing="false" onAction="#OnPictureDefaultClick" prefWidth="68.0" text="Default" />
-         </children>
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+      prefHeight="800.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unimol.diffusiontool.controller.DiffusionController">
+
+   <VBox prefHeight="800.0" prefWidth="300.0">
+      <AnchorPane prefHeight="800.0" prefWidth="300.0">
+         <Pane layoutY="25.0" prefHeight="100.0" prefWidth="300.0">
+            <Label layoutX="14.0" layoutY="21.0" text="You are logged in as"/>
+            <Label fx:id="userLabel" layoutX="45.0" layoutY="40.0"/>
+            <Button fx:id="logoutButton" layoutX="224.0" layoutY="62.0" mnemonicParsing="false"
+                    onAction="#OnLogOutClick" text="Logout"/>
+         </Pane>
+         <Button fx:id="homeButton" layoutY="200.0" mnemonicParsing="false" onAction="#OnHomeClick"
+                 prefHeight="100.0" prefWidth="300.0" text="Home">
+            <graphic>
+               <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                  <Image url="@tool/home.png"/>
+               </ImageView>
+            </graphic>
+         </Button>
+         <Button fx:id="generateButton" layoutY="350.0" mnemonicParsing="false" onAction="#OnGenerateClick"
+                 prefHeight="100.0" prefWidth="300.0" text="Generate">
+            <graphic>
+               <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                  <Image url="@tool/generate.png"/>
+               </ImageView>
+            </graphic>
+         </Button>
+         <Button fx:id="upscaleButton" layoutY="500.0" mnemonicParsing="false" onAction="#OnUpscaleClick"
+                 prefHeight="100.0" prefWidth="300.0" text="Upscale">
+            <graphic>
+               <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true">
+                  <Image url="@tool/resize.png"/>
+               </ImageView>
+            </graphic>
+         </Button>
+         <ImageView fitHeight="65.0" fitWidth="65.0" layoutX="45.0" layoutY="675.0" pickOnBounds="true"
+                    preserveRatio="true">
+            <Image url="@tool/stable-diffusion-icon.png"/>
+         </ImageView>
+         <Label layoutX="129.0" layoutY="698.0" text="Stable Diffusion">
+            <font>
+               <Font size="14.0"/>
+            </font>
+         </Label>
       </AnchorPane>
-   </children>
+   </VBox>
+   <AnchorPane prefHeight="800.0" prefWidth="1000.0">
+      <Label layoutX="42.0" layoutY="78.0" text="Profile Info">
+         <font>
+            <Font name="System Bold" size="36.0"/>
+         </font>
+      </Label>
+      <Label layoutX="42.0" layoutY="162.0" text="Username">
+         <font>
+            <Font size="14.0"/>
+         </font>
+      </Label>
+      <TextField fx:id="usernameField" editable="false" layoutX="42.0" layoutY="192.0" prefHeight="24.0"
+                 prefWidth="882.0"/>
+      <Button fx:id="usernameChangeButton" layoutX="139.0" layoutY="158.0" mnemonicParsing="false"
+              onAction="#OnUsernameChangeClick" text="Change"/>
+      <Button fx:id="usernameCancelButton" layoutX="42.0" layoutY="229.0" mnemonicParsing="false"
+              onAction="#OnUsernameCancelClick" text="Cancel" textFill="RED" visible="false"/>
+      <Button fx:id="usernameApplyButton" layoutX="862.0" layoutY="229.0" mnemonicParsing="false"
+              onAction="#OnUsernameApplyClick" text="Apply" textFill="#078300" visible="false"/>
+      <Label layoutX="42.0" layoutY="275.0" text="Email">
+         <font>
+            <Font size="14.0"/>
+         </font>
+      </Label>
+      <TextField fx:id="emailField" editable="false" layoutX="42.0" layoutY="305.0" prefHeight="26.0"
+                 prefWidth="882.0"/>
+      <Button fx:id="emailChangeButton" layoutX="109.0" layoutY="271.0" mnemonicParsing="false"
+              onAction="#OnEmailChangeClick" text="Change"/>
+      <Button fx:id="emailCancelButton" layoutX="42.0" layoutY="342.0" mnemonicParsing="false"
+              onAction="#OnEmailCancelClick" text="Cancel" textFill="RED" visible="false"/>
+      <Button fx:id="emailApplyButton" layoutX="870.0" layoutY="342.0" mnemonicParsing="false"
+              onAction="#OnEmailApplyClick" text="Apply" textFill="#078300" visible="false"/>
+      <Label layoutX="42.0" layoutY="388.0" text="Birthdate">
+         <font>
+            <Font size="14.0"/>
+         </font>
+      </Label>
+      <TextField fx:id="birthdateField" editable="false" layoutX="42.0" layoutY="418.0" prefHeight="26.0"
+                 prefWidth="882.0"/>
+      <Button fx:id="birthdateChangeButton" layoutX="139.0" layoutY="384.0" mnemonicParsing="false"
+              onAction="#OnBirthdateChangeClick" text="Change"/>
+      <DatePicker fx:id="birthdatePicker" layoutX="282.0" layoutY="384.0" visible="false"/>
+      <Button fx:id="birthdateCancelButton" layoutX="483.0" layoutY="384.0" mnemonicParsing="false"
+              onAction="#OnBirthdateCancelClick" text="Cancel" textFill="RED" visible="false"/>
+      <Button fx:id="birthdateApplyButton" layoutX="554.0" layoutY="384.0" mnemonicParsing="false"
+              onAction="#OnBirthdateApplyClick" text="Apply" textFill="#078300" visible="false"/>
+      <Label layoutX="42.0" layoutY="501.0" text="Password">
+         <font>
+            <Font size="14.0"/>
+         </font>
+      </Label>
+      <Button fx:id="passwordChangeButton" layoutX="138.0" layoutY="497.0" mnemonicParsing="false"
+              onAction="#OnPasswordChangeClick" text="Change"/>
+      <Button fx:id="passwordCancelButton" layoutX="42.0" layoutY="568.0" mnemonicParsing="false"
+              onAction="#OnPasswordCancelClick" text="Cancel" textFill="RED" visible="false"/>
+      <Button fx:id="passwordApplyButton" layoutX="870.0" layoutY="568.0" mnemonicParsing="false"
+              onAction="#OnPasswordApplyClick" text="Apply" textFill="#078300" visible="false"/>
+      <PasswordField fx:id="passwordField" editable="false" layoutX="42.0" layoutY="531.0" prefHeight="26.0"
+                     prefWidth="882.0"/>
+      <Label layoutX="39.0" layoutY="614.0" text="Picture">
+         <font>
+            <Font size="14.0"/>
+         </font>
+      </Label>
+      <ImageView fx:id="profileUserImage" fitHeight="65.0" fitWidth="65.0" layoutX="39.0" layoutY="652.0"
+                 pickOnBounds="true" preserveRatio="true"/>
+      <Button fx:id="pictureChangeButton" layoutX="207.0" layoutY="611.0" mnemonicParsing="false"
+              onAction="#OnPictureChangeClick" text="Change"/>
+      <Button fx:id="profileDeleteButton" layoutX="757.0" layoutY="732.0" mnemonicParsing="false"
+              onAction="#OnProfileDeleteClick" text="DELETE YOUR PROFILE" textFill="RED"/>
+      <Button fx:id="pictureDefaultButton" layoutX="118.0" layoutY="611.0" mnemonicParsing="false"
+              onAction="#OnPictureDefaultClick" prefWidth="68.0" text="Default"/>
+   </AnchorPane>
 </HBox>
