@@ -8,7 +8,6 @@ import it.unimol.diffusiontool.entities.User;
 import it.unimol.diffusiontool.entities.UserManager;
 import it.unimol.diffusiontool.exceptions.*;
 import it.unimol.diffusiontool.properties.FXMLProperties;
-import it.unimol.diffusiontool.properties.GeneralProperties;
 import it.unimol.diffusiontool.threads.StoppableThread;
 import it.unimol.diffusiontool.validators.BirthdateValidator;
 import it.unimol.diffusiontool.validators.EmailValidator;
@@ -17,6 +16,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -37,12 +37,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static it.unimol.diffusiontool.properties.GeneralProperties.ERROR;
+import static it.unimol.diffusiontool.properties.GeneralProperties.MAX_CAPACITY;
 import static java.lang.Thread.sleep;
 
 public class DiffusionController {
+    private final DiffusionApplication diffApp = DiffusionApplication.getToolInstance();
     private final SimpleObjectProperty<Image> profilePicProperty = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<Image> generatedImgProperty = new SimpleObjectProperty<>();
-    private final DiffusionApplication diffApp = DiffusionApplication.getToolInstance();
+    private final SimpleObjectProperty<Image> firstUpsImgProperty = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<Image> secondUpsImgProperty = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<Image> thirdUpsImgProperty = new SimpleObjectProperty<>();
+    private int activeImages;
+    private int mutex;
     private String formattedDate;
     @FXML
     private Label userLabel;
@@ -272,7 +279,18 @@ public class DiffusionController {
             e.printStackTrace();
         }
 
-        return GeneralProperties.ERROR.getValue();
+        return ERROR.getCode();
+    }
+
+    private int checkAvailableSpace() {
+        if (!firstImagePane.isVisible())
+            return 0;
+        if (!secondImagePane.isVisible())
+            return 1;
+        if (!thirdImagePane.isVisible())
+            return 2;
+
+        return MAX_CAPACITY.getValue();
     }
 
     @FXML
@@ -312,6 +330,9 @@ public class DiffusionController {
     }
 
     private void initUpscaleView() {
+        activeImages = 0;
+        mutex = 0;
+
         profileButton.setBackground(null);
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         homeUserImage.imageProperty().bind(profilePicProperty);
@@ -746,7 +767,65 @@ public class DiffusionController {
 
     @FXML
     private void OnSelectClick() {
+        try {
+            if (activeImages < MAX_CAPACITY.getValue()) {
+                try {
+                    FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle("Select an image");
+                    File file = fileChooser.showOpenDialog(new Stage());
+                    FileChooser.ExtensionFilter imageFilter = new FileChooser.ExtensionFilter("Image Files",
+                            "*.png", "*.jpg", "*.jpeg", "*.gif");
+                    fileChooser.getExtensionFilters().add(imageFilter);
 
+                    if (file != null) {
+                        if (isImageFile(file)) {
+                            activeImages++;
+                            Image image = new Image(file.toURI().toString());
+                            int isSpaceAvailable = checkAvailableSpace();
+
+                            switch (isSpaceAvailable) {
+                                case 0:
+                                    firstImagePane.setVisible(true);
+                                    firstUpsImgProperty.set(image);
+                                    firstImgView.imageProperty().bind(firstUpsImgProperty);
+                                    break;
+
+                                case 1:
+                                    secondImagePane.setVisible(true);
+                                    secondUpsImgProperty.set(image);
+                                    secondImgView.imageProperty().bind(secondUpsImgProperty);
+                                    break;
+
+                                case 2:
+                                    thirdImagePane.setVisible(true);
+                                    thirdUpsImgProperty.set(image);
+                                    thirdImgView.imageProperty().bind(thirdUpsImgProperty);
+                                    break;
+
+                                case 3:
+                                    throw new MaxCapacityException();
+                            }
+
+                        } else
+                            throw new InvalidObjectException("Not an image");
+                    }
+
+                } catch (InvalidObjectException e) {
+                    Alert invObjAlert = new Alert(Alert.AlertType.ERROR);
+                    invObjAlert.setHeaderText("ERROR: Not an Image");
+                    invObjAlert.setContentText("The selected file is not an image. Please retry.");
+                    invObjAlert.showAndWait();
+                }
+
+            } else
+                throw new MaxCapacityException();
+
+        } catch (MaxCapacityException e) {
+            Alert mcAlert = new Alert(Alert.AlertType.ERROR);
+            mcAlert.setHeaderText("ERROR: Max Capacity Reached");
+            mcAlert.setContentText("As stated before, you can't load more than three images.");
+            mcAlert.showAndWait();
+        }
     }
 
     @FXML
@@ -755,8 +834,22 @@ public class DiffusionController {
     }
 
     @FXML
-    private void OnUpscaleDeleteClick() {
+    private void OnUpscaleDeleteClick(ActionEvent event) {
+        Button clickedButton = (Button) event.getSource();
 
+        if (clickedButton.equals(firstDeleteButton)) {
+            firstImgView.imageProperty().unbind();
+            firstImagePane.setVisible(false);
+            activeImages--;
+        } else if (clickedButton.equals(secondDeleteButton)) {
+            secondImgView.imageProperty().unbind();
+            secondImagePane.setVisible(false);
+            activeImages--;
+        } else if (clickedButton.equals(thirdDeleteButton)) {
+            thirdImgView.imageProperty().unbind();
+            thirdImagePane.setVisible(false);
+            activeImages--;
+        }
     }
 
     @FXML

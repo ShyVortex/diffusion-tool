@@ -74,37 +74,25 @@
       </Label>
       <Pane layoutX="9.0" layoutY="352.0" prefHeight="447.0" prefWidth="981.0">
          <Pane fx:id="firstImagePane" prefHeight="155.0" prefWidth="981.0" visible="false">
-            <ImageView fx:id="firstImgView" fitHeight="128.0" fitWidth="128.0" layoutX="27.0" layoutY="15.0"
-                       pickOnBounds="true" preserveRatio="true"/>
-            <TextArea fx:id="firstTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0"/>
-            <Button fx:id="firstStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false"
-                    onAction="#OnUpscaleStartClick" text="Start"/>
-            <Button fx:id="firstDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false"
-                    onAction="#OnUpscaleDeleteClick" text="Delete"/>
-            <Button fx:id="firstShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false"
-                    onAction="#OnUpscaleShowClick" text="Show" visible="false"/>
+            <ImageView fx:id="firstImgView" fitHeight="128.0" fitWidth="128.0" layoutX="27.0" layoutY="15.0" pickOnBounds="true" />
+            <TextArea fx:id="firstTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0" />
+            <Button fx:id="firstStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleStartClick" text="Start" />
+            <Button fx:id="firstDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleDeleteClick" text="Delete" />
+            <Button fx:id="firstShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleShowClick" text="Show" visible="false" />
          </Pane>
          <Pane fx:id="secondImagePane" layoutY="145.0" prefHeight="155.0" prefWidth="981.0" visible="false">
-            <ImageView fx:id="secondImgView" fitHeight="128.0" fitWidth="128.0" layoutX="27.0" layoutY="15.0"
-                       pickOnBounds="true" preserveRatio="true"/>
-            <TextArea fx:id="secondTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0"/>
-            <Button fx:id="secondStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false"
-                    onAction="#OnUpscaleStartClick" text="Start"/>
-            <Button fx:id="secondDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false"
-                    onAction="#OnUpscaleDeleteClick" text="Delete"/>
-            <Button fx:id="secondShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false"
-                    onAction="#OnUpscaleShowClick" text="Show" visible="false"/>
+            <ImageView fx:id="secondImgView" fitHeight="128.0" fitWidth="128.0" layoutX="27.0" layoutY="15.0" pickOnBounds="true" />
+            <TextArea fx:id="secondTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0" />
+            <Button fx:id="secondStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleStartClick" text="Start" />
+            <Button fx:id="secondDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleDeleteClick" text="Delete" />
+            <Button fx:id="secondShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleShowClick" text="Show" visible="false" />
          </Pane>
          <Pane fx:id="thirdImagePane" layoutY="290.0" prefHeight="155.0" prefWidth="981.0" visible="false">
-            <ImageView fx:id="thirdImgView" fitHeight="128.0" fitWidth="128.0" layoutX="27.0" layoutY="15.0"
-                       pickOnBounds="true" preserveRatio="true"/>
-            <TextArea fx:id="thirdTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0"/>
-            <Button fx:id="thirdStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false"
-                    onAction="#OnUpscaleStartClick" text="Start"/>
-            <Button fx:id="thirdDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false"
-                    onAction="#OnUpscaleDeleteClick" text="Delete"/>
-            <Button fx:id="thirdShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false"
-                    onAction="#OnUpscaleShowClick" text="Show" visible="false"/>
+            <ImageView fx:id="thirdImgView" fitHeight="128.0" fitWidth="128.0" layoutX="27.0" layoutY="15.0" pickOnBounds="true" />
+            <TextArea fx:id="thirdTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0" />
+            <Button fx:id="thirdStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleStartClick" text="Start" />
+            <Button fx:id="thirdDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleDeleteClick" text="Delete" />
+            <Button fx:id="thirdShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleShowClick" text="Show" visible="false" />
          </Pane>
       </Pane>
    </AnchorPane>
