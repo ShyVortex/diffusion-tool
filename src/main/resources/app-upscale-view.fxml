@@ -3,7 +3,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -62,32 +61,51 @@
             </graphic>
          </Button>
       </Pane>
-      <Label layoutX="50.0" layoutY="142.0" text="Generate any image from words">
+      <Label layoutX="50.0" layoutY="150.0" text="Upscale any image with AI">
          <font>
             <Font name="System Bold" size="36.0" />
          </font>
       </Label>
-      <Label layoutX="50.0" layoutY="197.0" text="Describe what you want to create:">
+      <Button fx:id="selectButton" layoutX="433.0" layoutY="250.0" mnemonicParsing="false" onAction="#OnSelectClick" prefHeight="50.0" text="(+) Select Images" />
+      <Label layoutX="398.0" layoutY="315.0" text="Select up to three images.">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <TextArea fx:id="promptArea" layoutX="50.0" layoutY="227.0" prefHeight="100.0" prefWidth="670.0" wrapText="true" />
-      <Label layoutX="50.0" layoutY="347.0" text="Enter tags to improve the result:">
-         <font>
-            <Font size="16.0" />
-         </font>
-      </Label>
-      <TextField fx:id="tagsField" layoutX="50.0" layoutY="377.0" prefHeight="24.0" prefWidth="670.0" />
-      <Button fx:id="promptResetButton" layoutX="50.0" layoutY="422.0" minWidth="62.0" mnemonicParsing="false" onAction="#OnPromptResetClick" text="Reset" />
-      <Button fx:id="createButton" layoutX="658.0" layoutY="422.0" mnemonicParsing="false" onAction="#OnCreateClick" text="Create" />
-      <Label fx:id="processingLabel" layoutX="50.0" layoutY="475.0" text="Processing..." visible="false">
-         <font>
-            <Font size="24.0" />
-         </font>
-      </Label>
-      <ImageView fx:id="genImgPreview" fitHeight="256.0" fitWidth="256.0" layoutX="50.0" layoutY="515.0" pickOnBounds="true" preserveRatio="true" />
-      <Button fx:id="imageDeleteButton" layoutX="335.0" layoutY="747.0" mnemonicParsing="false" onAction="#OnImageDeleteClick" text="Delete" visible="false" />
-      <Button fx:id="imageShowButton" layoutX="419.0" layoutY="747.0" mnemonicParsing="false" onAction="#OnImageShowClick" prefWidth="61.0" text="Show" visible="false" />
+      <Pane layoutX="9.0" layoutY="352.0" prefHeight="447.0" prefWidth="981.0">
+         <Pane fx:id="firstImagePane" prefHeight="155.0" prefWidth="981.0" visible="false">
+            <ImageView fx:id="firstImgView" fitHeight="128.0" fitWidth="128.0" layoutX="27.0" layoutY="15.0"
+                       pickOnBounds="true" preserveRatio="true"/>
+            <TextArea fx:id="firstTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0"/>
+            <Button fx:id="firstStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false"
+                    onAction="#OnUpscaleStartClick" text="Start"/>
+            <Button fx:id="firstDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false"
+                    onAction="#OnUpscaleDeleteClick" text="Delete"/>
+            <Button fx:id="firstShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false"
+                    onAction="#OnUpscaleShowClick" text="Show" visible="false"/>
+         </Pane>
+         <Pane fx:id="secondImagePane" layoutY="145.0" prefHeight="155.0" prefWidth="981.0" visible="false">
+            <ImageView fx:id="secondImgView" fitHeight="128.0" fitWidth="128.0" layoutX="27.0" layoutY="15.0"
+                       pickOnBounds="true" preserveRatio="true"/>
+            <TextArea fx:id="secondTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0"/>
+            <Button fx:id="secondStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false"
+                    onAction="#OnUpscaleStartClick" text="Start"/>
+            <Button fx:id="secondDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false"
+                    onAction="#OnUpscaleDeleteClick" text="Delete"/>
+            <Button fx:id="secondShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false"
+                    onAction="#OnUpscaleShowClick" text="Show" visible="false"/>
+         </Pane>
+         <Pane fx:id="thirdImagePane" layoutY="290.0" prefHeight="155.0" prefWidth="981.0" visible="false">
+            <ImageView fx:id="thirdImgView" fitHeight="128.0" fitWidth="128.0" layoutX="27.0" layoutY="15.0"
+                       pickOnBounds="true" preserveRatio="true"/>
+            <TextArea fx:id="thirdTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0"/>
+            <Button fx:id="thirdStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false"
+                    onAction="#OnUpscaleStartClick" text="Start"/>
+            <Button fx:id="thirdDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false"
+                    onAction="#OnUpscaleDeleteClick" text="Delete"/>
+            <Button fx:id="thirdShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false"
+                    onAction="#OnUpscaleShowClick" text="Show" visible="false"/>
+         </Pane>
+      </Pane>
    </AnchorPane>
 </HBox>

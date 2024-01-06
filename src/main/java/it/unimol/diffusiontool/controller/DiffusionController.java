@@ -23,6 +23,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -119,6 +120,44 @@ public class DiffusionController {
     private Button imageDeleteButton;
     @FXML
     private Button imageShowButton;
+    @FXML
+    private Button selectButton;
+    @FXML
+    private Pane firstImagePane;
+    @FXML
+    private ImageView firstImgView;
+    @FXML
+    private TextArea firstTextArea;
+    @FXML
+    private Button firstStartButton;
+    @FXML
+    private Button firstDeleteButton;
+    @FXML
+    private Button firstShowButton;
+    @FXML
+    private Pane secondImagePane;
+    @FXML
+    private ImageView secondImgView;
+    @FXML
+    private TextArea secondTextArea;
+    @FXML
+    private Button secondStartButton;
+    @FXML
+    private Button secondDeleteButton;
+    @FXML
+    private Button secondShowButton;
+    @FXML
+    private Pane thirdImagePane;
+    @FXML
+    private ImageView thirdImgView;
+    @FXML
+    private TextArea thirdTextArea;
+    @FXML
+    private Button thirdStartButton;
+    @FXML
+    private Button thirdDeleteButton;
+    @FXML
+    private Button thirdShowButton;
 
     private String getLoggedInUser() {
         return diffApp.getUser().getUsername();
@@ -240,14 +279,16 @@ public class DiffusionController {
     private void initialize() {
         userLabel.textProperty().bind(Bindings.createStringBinding(this::getLoggedInUser));
         if (diffApp.getCurrentFXML().equals(FXMLProperties.getInstance().getHomeFXML()))
-            initializeHomeView();
+            initHomeView();
         if (diffApp.getCurrentFXML().equals(FXMLProperties.getInstance().getProfileFXML()))
-            initializeProfileView();
+            initProfileView();
         if (diffApp.getCurrentFXML().equals(FXMLProperties.getInstance().getGenerateFXML()))
-            initializeGenerateView();
+            initGenerateView();
+        if (diffApp.getCurrentFXML().equals(FXMLProperties.getInstance().getUpscaleFXML()))
+            initUpscaleView();
     }
 
-    private void initializeHomeView() {
+    private void initHomeView() {
         profileButton.setBackground(null);
         genImgsLabel.textProperty().bind(Bindings.createStringBinding(this::countGeneratedImgs));
         upscImgsLabel.textProperty().bind(Bindings.createStringBinding(this::countUpscaledImgs));
@@ -255,7 +296,7 @@ public class DiffusionController {
         homeUserImage.imageProperty().bind(profilePicProperty);
     }
 
-    private void initializeProfileView() {
+    private void initProfileView() {
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         profileUserImage.imageProperty().bind(profilePicProperty);
         usernameField.textProperty().bind(Bindings.createStringBinding(this::getLoggedInUser));
@@ -264,7 +305,13 @@ public class DiffusionController {
         passwordField.textProperty().bind(Bindings.createStringBinding(this::getUserPassword));
     }
 
-    private void initializeGenerateView() {
+    private void initGenerateView() {
+        profileButton.setBackground(null);
+        profilePicProperty.set(diffApp.getUser().getProfilePic());
+        homeUserImage.imageProperty().bind(profilePicProperty);
+    }
+
+    private void initUpscaleView() {
         profileButton.setBackground(null);
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         homeUserImage.imageProperty().bind(profilePicProperty);
@@ -305,8 +352,11 @@ public class DiffusionController {
     }
 
     @FXML
-    private void OnUpscaleClick() {
-
+    private void OnUpscaleClick() throws IOException {
+        diffApp.setCurrentFXML(new FXMLLoader(FXMLProperties.getInstance().getUpscaleFXML().getLocation()));
+        Parent rootNode = diffApp.getCurrentFXML().load();
+        diffApp.setRootNode(rootNode);
+        diffApp.restart();
     }
 
     @FXML
@@ -692,5 +742,25 @@ public class DiffusionController {
         viewerApp.setExportedImage(image);
         viewerApp.init();
         viewerApp.start(new Stage());
+    }
+
+    @FXML
+    private void OnSelectClick() {
+
+    }
+
+    @FXML
+    private void OnUpscaleStartClick() {
+
+    }
+
+    @FXML
+    private void OnUpscaleDeleteClick() {
+
+    }
+
+    @FXML
+    private void OnUpscaleShowClick() {
+
     }
 }

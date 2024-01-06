@@ -9,6 +9,7 @@ public class FXMLProperties {
     private FXMLLoader profileFXML;
     private FXMLLoader generateFXML;
     private FXMLLoader viewerFXML;
+    private FXMLLoader upscaleFXML;
     private static FXMLProperties instance;
 
     public FXMLProperties() {
@@ -18,6 +19,7 @@ public class FXMLProperties {
         profileFXML = new FXMLLoader(this.getClass().getResource("/app-profile-view.fxml"));
         generateFXML = new FXMLLoader(this.getClass().getResource("/app-generate-view.fxml"));
         viewerFXML = new FXMLLoader(this.getClass().getResource("/image-view.fxml"));
+        upscaleFXML = new FXMLLoader(this.getClass().getResource("/app-upscale-view.fxml"));
     }
 
     public static FXMLProperties getInstance() {
@@ -49,5 +51,9 @@ public class FXMLProperties {
 
     public FXMLLoader getViewerFXML() {
         return viewerFXML;
+    }
+
+    public FXMLLoader getUpscaleFXML() {
+        return upscaleFXML;
     }
 }
