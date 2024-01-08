@@ -2,6 +2,9 @@ package it.unimol.diffusiontool.properties;
 
 public enum GeneralProperties {
     ERROR (null),
+    NULL (0),
+    GENERATE (1),
+    UPSCALE (2),
     MAX_CAPACITY (3),
     AVAILABLE (0),
     BUSY (1);

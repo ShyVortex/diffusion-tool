@@ -7,6 +7,7 @@ import it.unimol.diffusiontool.application.ViewerApplication;
 import it.unimol.diffusiontool.entities.User;
 import it.unimol.diffusiontool.entities.UserManager;
 import it.unimol.diffusiontool.exceptions.*;
+import it.unimol.diffusiontool.interfaces.Pythonable;
 import it.unimol.diffusiontool.properties.FXMLProperties;
 import it.unimol.diffusiontool.threads.StoppableThread;
 import it.unimol.diffusiontool.validators.BirthdateValidator;
@@ -32,17 +33,15 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static it.unimol.diffusiontool.properties.GeneralProperties.ERROR;
-import static it.unimol.diffusiontool.properties.GeneralProperties.MAX_CAPACITY;
+import static it.unimol.diffusiontool.properties.GeneralProperties.*;
 import static java.lang.Thread.sleep;
 
-public class DiffusionController {
+public class DiffusionController implements Pythonable {
     private final DiffusionApplication diffApp = DiffusionApplication.getToolInstance();
+    private final ViewerApplication viewerApp = ViewerApplication.getInstance();
     private final SimpleObjectProperty<Image> profilePicProperty = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<Image> generatedImgProperty = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<Image> firstUpsImgProperty = new SimpleObjectProperty<>();
@@ -50,7 +49,9 @@ public class DiffusionController {
     private final SimpleObjectProperty<Image> thirdUpsImgProperty = new SimpleObjectProperty<>();
     private int activeImages;
     private int mutex;
+    private int pythonCalledBy;
     private String formattedDate;
+    private List<Image> upscaledImages;
     @FXML
     private Label userLabel;
     @FXML
@@ -140,6 +141,8 @@ public class DiffusionController {
     @FXML
     private Button firstDeleteButton;
     @FXML
+    private Label firstProcessLabel;
+    @FXML
     private Button firstShowButton;
     @FXML
     private Pane secondImagePane;
@@ -152,6 +155,8 @@ public class DiffusionController {
     @FXML
     private Button secondDeleteButton;
     @FXML
+    private Label secondProcessLabel;
+    @FXML
     private Button secondShowButton;
     @FXML
     private Pane thirdImagePane;
@@ -163,6 +168,8 @@ public class DiffusionController {
     private Button thirdStartButton;
     @FXML
     private Button thirdDeleteButton;
+    @FXML
+    private Label thirdProcessLabel;
     @FXML
     private Button thirdShowButton;
 
@@ -182,120 +189,12 @@ public class DiffusionController {
         return diffApp.getUser().getPassword();
     }
 
-    private String countGeneratedImgs() {
-        User user = diffApp.getUser();
-        int num = user.countGeneratedImgs();
-        String startText = "You have generated ";
-        String endText;
-
-        if (num == 1)
-            endText = " image so far.";
-        else
-            endText = " images so far.";
-
-        return startText + num + endText;
-    }
-
-    private String countUpscaledImgs() {
-        User user = diffApp.getUser();
-        String startText = "You have upscaled ";
-        String endText = " images so far.";
-
-        return startText + user.getUpscImgsNum() + endText;
-    }
-
-    private String updateProcessingLabel() {
-        return "Preview";
-    }
-
-    private boolean isImageFile(File file) {
-        try {
-            // Attempt to load the file as an image
-            Image image = new Image(file.toURI().toString());
-            return !image.isError(); // If loading succeeds, it's an image
-        } catch (Exception e) {
-            return false; // If loading fails, it's not an image
-        }
-    }
-
-    private String callPythonGenerate(String prompt, String date) throws IOException, GenerationException {
-        String activateScriptPath = "venv/bin/python";
-        String pythonScriptPath = "src/main/python/it/unimol/diffusiontool/generate.py";
-        StringBuilder output = new StringBuilder();
-        StringBuilder errorOutput = new StringBuilder();
-
-        // Construct the command to execute
-        List<String> command = List.of (
-                activateScriptPath,      // Activate virtual environment
-                pythonScriptPath,        // Path to the Python script
-                prompt,                  // Prompt argument
-                date                    // Date argument
-        );
-
-        // Start the process
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
-        Process process = processBuilder.start();
-
-        // Capture and print the error stream
-        try (
-                InputStream inputStream = process.getInputStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader inputbufferedReader = new BufferedReader(inputStreamReader);
-                InputStream errorStream = process.getErrorStream();
-                InputStreamReader errorStreamReader = new InputStreamReader(errorStream);
-                BufferedReader errorBufferedReader = new BufferedReader(errorStreamReader)
-        ) {
-            String inputLine;
-            while ((inputLine = inputbufferedReader.readLine()) != null) {
-                output.append(inputLine).append("\n");
-            }
-
-            String errorLine;
-            while ((errorLine = errorBufferedReader.readLine()) != null) {
-                errorOutput.append(errorLine).append("\n");
-            }
-        }
-
-        // Wait for the process to finish
-        try {
-            int exitCode = process.waitFor();
-            System.out.println("Python script exited with code: " + exitCode);
-
-            if (exitCode == 0) {
-                // If there is no error, return the output as a String
-            /*
-                String absolutePath = output.toString();
-                String relativePath = absolutePath.replace(System.getProperty("user.dir") + "/", "");
-            */
-                System.out.println(errorOutput.toString().trim());
-                return output.toString().trim();
-            } else {
-                // If there is an error, print the error and throw an exception
-                System.err.println("Error output:\n" + errorOutput.toString().trim());
-                throw new GenerationException();
-            }
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        return ERROR.getCode();
-    }
-
-    private int checkAvailableSpace() {
-        if (!firstImagePane.isVisible())
-            return 0;
-        if (!secondImagePane.isVisible())
-            return 1;
-        if (!thirdImagePane.isVisible())
-            return 2;
-
-        return MAX_CAPACITY.getValue();
-    }
-
     @FXML
     private void initialize() {
+        pythonCalledBy = NULL.getValue();
+        upscaledImages = new ArrayList<>(3);
         userLabel.textProperty().bind(Bindings.createStringBinding(this::getLoggedInUser));
+
         if (diffApp.getCurrentFXML().equals(FXMLProperties.getInstance().getHomeFXML()))
             initHomeView();
         if (diffApp.getCurrentFXML().equals(FXMLProperties.getInstance().getProfileFXML()))
@@ -306,6 +205,7 @@ public class DiffusionController {
             initUpscaleView();
     }
 
+    @FXML
     private void initHomeView() {
         profileButton.setBackground(null);
         genImgsLabel.textProperty().bind(Bindings.createStringBinding(this::countGeneratedImgs));
@@ -314,6 +214,7 @@ public class DiffusionController {
         homeUserImage.imageProperty().bind(profilePicProperty);
     }
 
+    @FXML
     private void initProfileView() {
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         profileUserImage.imageProperty().bind(profilePicProperty);
@@ -323,15 +224,17 @@ public class DiffusionController {
         passwordField.textProperty().bind(Bindings.createStringBinding(this::getUserPassword));
     }
 
+    @FXML
     private void initGenerateView() {
         profileButton.setBackground(null);
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         homeUserImage.imageProperty().bind(profilePicProperty);
     }
 
+    @FXML
     private void initUpscaleView() {
         activeImages = 0;
-        mutex = 0;
+        mutex = AVAILABLE.getValue();
 
         profileButton.setBackground(null);
         profilePicProperty.set(diffApp.getUser().getProfilePic());
@@ -665,11 +568,11 @@ public class DiffusionController {
 
             try {
                 processingThread.stop(processingThread);
-                processingLabel.setVisible(true);
+                pythonCalledBy = GENERATE.getValue();
                 AtomicReference<String> base64EncodedImage = new AtomicReference<>();
                 StoppableThread pyThread = new StoppableThread(() -> {
                     try {
-                        base64EncodedImage.set(callPythonGenerate(prompt, formattedDate));
+                        base64EncodedImage.set(callPythonScript(prompt, formattedDate));
                         StoppableThread.currentThread().stop(StoppableThread.currentThread());
                     } catch (IOException | GenerationException e) {
                         throw new RuntimeException(e);
@@ -681,7 +584,7 @@ public class DiffusionController {
                     while (true) {
                         try {
                             sleep(1000);
-                            if (!pyThread.isAlive() && base64EncodedImage.toString() != null) {
+                            if (!pyThread.isAlive() && base64EncodedImage.get() != null) {
                                 Platform.runLater(() -> {
                                     processingLabel.textProperty().bind(Bindings.createStringBinding(
                                             DiffusionController.this::updateProcessingLabel));
@@ -715,6 +618,7 @@ public class DiffusionController {
                 genAlert.setHeaderText("ERROR: Generation Failure");
                 genAlert.setContentText("Something went wrong in the image creation. Please retry");
                 genAlert.showAndWait();
+                pythonCalledBy = NULL.getValue();
                 processingLabel.setVisible(false);
             }
 
@@ -757,7 +661,6 @@ public class DiffusionController {
 
     @FXML
     private void OnImageShowClick() throws Exception {
-        ViewerApplication viewerApp = new ViewerApplication();
         Image image = Iterables.getLast(diffApp.getUser().getGeneratedImages());
 
         viewerApp.setExportedImage(image);
@@ -829,8 +732,125 @@ public class DiffusionController {
     }
 
     @FXML
-    private void OnUpscaleStartClick() {
+    private void OnUpscaleStartClick(ActionEvent event) {
+        try {
+            if (mutex == AVAILABLE.getValue()) {
+                mutex = BUSY.getValue();
+                Button clickedButton = (Button) event.getSource();
+                Button validButton;
+                Label validLabel;
+                Image validImage;
+                int index;
 
+                if (clickedButton.equals(firstStartButton)) {
+                    validButton = firstShowButton;
+                    validLabel = firstProcessLabel;
+                    validImage = firstImgView.getImage();
+                    index = 0;
+                }
+                else if (clickedButton.equals(secondStartButton)) {
+                    validButton = secondShowButton;
+                    validLabel = secondProcessLabel;
+                    validImage = secondImgView.getImage();
+                    index = 1;
+                }
+                else if (clickedButton.equals(thirdStartButton)) {
+                    validButton = thirdShowButton;
+                    validLabel = thirdProcessLabel;
+                    validImage = thirdImgView.getImage();
+                    index = 2;
+                } else {
+                    validButton = null;
+                    validLabel = null;
+                    validImage = null;
+                    index = -1;
+                }
+
+                // These are pointers, each will point to one existing object
+                assert validButton != null;
+                assert validLabel != null;
+                assert validImage != null;
+
+                // this image has already been upscaled
+                if (upscaledImages.get(index) != null)
+                    throw new DuplicatedActionException();
+
+                StoppableThread processingThread = new StoppableThread(() -> {
+                    validLabel.setVisible(true);
+                    disableAllButtons();
+                });
+                processingThread.start();
+
+                try {
+                    processingThread.stop(processingThread);
+                    pythonCalledBy = UPSCALE.getValue();
+                    AtomicReference<String> base64EncodedImage = new AtomicReference<>();
+                    StoppableThread pyThread = new StoppableThread(() -> {
+                        try {
+                            base64EncodedImage.set(callPythonScript(validImage));
+                            StoppableThread.currentThread().stop(StoppableThread.currentThread());
+                        } catch (IOException | UpscalingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                    pyThread.start();
+
+                    StoppableThread updateThread = new StoppableThread(() -> {
+                        while (true) {
+                            try {
+                                sleep(1000);
+                                if (!pyThread.isAlive() && base64EncodedImage.get() != null) {
+                                    Platform.runLater(() -> {
+                                        validLabel.setVisible(false);
+                                        byte[] decodedBytes = Base64.getDecoder().decode(base64EncodedImage.get());
+                                        ByteArrayInputStream bis = new ByteArrayInputStream(decodedBytes);
+                                        Image outImage;
+                                        try {
+                                            outImage = SwingFXUtils.toFXImage(ImageIO.read(bis), null);
+                                            validButton.setVisible(true);
+                                            diffApp.getUser().incUpscaledImages();
+                                            upscaledImages.set(index, outImage);
+                                            enableAllButtons();
+                                            mutex = AVAILABLE.getValue();
+                                        } catch (IOException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    });
+                                    break;
+                                }
+                            } catch (InterruptedException e) {
+                                processingLabel.setVisible(false);
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    });
+                    updateThread.start();
+
+                } catch (Exception e) {
+                    Alert genAlert = new Alert(Alert.AlertType.ERROR);
+                    genAlert.setHeaderText("ERROR: Upscaling Failure");
+                    genAlert.setContentText("Something went wrong in the image upscaling. Please retry");
+                    genAlert.showAndWait();
+                    validLabel.setVisible(false);
+                    pythonCalledBy = NULL.getValue();
+                    enableAllButtons();
+                    mutex = AVAILABLE.getValue();
+                }
+
+            } else
+                throw new BusyMutexException();
+
+        } catch (BusyMutexException e) {
+            Alert bmAlert = new Alert(Alert.AlertType.ERROR);
+            bmAlert.setHeaderText("ERROR: Busy Mutex");
+            bmAlert.setContentText("You can only upscale one image at once. Please wait for the process to end.");
+            bmAlert.showAndWait();
+        } catch (DuplicatedActionException e) {
+            Alert daAlert = new Alert(Alert.AlertType.ERROR);
+            daAlert.setHeaderText("ERROR: Duplicated Action");
+            daAlert.setContentText("The image ");
+            daAlert.showAndWait();
+        }
     }
 
     @FXML
@@ -838,14 +858,20 @@ public class DiffusionController {
         Button clickedButton = (Button) event.getSource();
 
         if (clickedButton.equals(firstDeleteButton)) {
+            if (upscaledImages.get(0) != null)
+                upscaledImages.set(0, null);
             firstImgView.imageProperty().unbind();
             firstImagePane.setVisible(false);
             activeImages--;
         } else if (clickedButton.equals(secondDeleteButton)) {
+            if (upscaledImages.get(1) != null)
+                upscaledImages.set(1, null);
             secondImgView.imageProperty().unbind();
             secondImagePane.setVisible(false);
             activeImages--;
         } else if (clickedButton.equals(thirdDeleteButton)) {
+            if (upscaledImages.get(2) != null)
+                upscaledImages.set(2, null);
             thirdImgView.imageProperty().unbind();
             thirdImagePane.setVisible(false);
             activeImages--;
@@ -855,5 +881,174 @@ public class DiffusionController {
     @FXML
     private void OnUpscaleShowClick() {
 
+    }
+
+    @Override
+    public String callPythonScript(String prompt, String date, Image image) throws IOException, GenerationException,
+            UpscalingException
+    {
+        String activateScriptPath = "venv/bin/python";
+        String pythonScriptPath;
+        StringBuilder output = new StringBuilder();
+        StringBuilder errorOutput = new StringBuilder();
+
+        pythonScriptPath = switch (pythonCalledBy) {
+            case 1 -> "src/main/python/it/unimol/diffusiontool/generate.py";
+            case 2 -> "src/main/python/it/unimol/diffusiontool/upscale.py";
+            default -> ERROR.getCode();
+        };
+
+        // Construct the command to execute
+        List<String> generateCommand = List.of (
+                activateScriptPath,      // Activate virtual environment
+                pythonScriptPath,        // Path to the Python script
+                prompt,                  // Prompt argument
+                date                    // Date argument
+        );
+
+        List<String> upscaleCommand = List.of (
+                activateScriptPath,
+                pythonScriptPath
+        );
+
+        // Start the process
+        ProcessBuilder processBuilder;
+        if (pythonCalledBy == GENERATE.getValue())
+            processBuilder = new ProcessBuilder(generateCommand);
+        else
+            processBuilder = new ProcessBuilder(upscaleCommand);
+        Process process = processBuilder.start();
+
+        // Capture and print the error stream
+        try (
+                InputStream inputStream = process.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader inputbufferedReader = new BufferedReader(inputStreamReader);
+                InputStream errorStream = process.getErrorStream();
+                InputStreamReader errorStreamReader = new InputStreamReader(errorStream);
+                BufferedReader errorBufferedReader = new BufferedReader(errorStreamReader)
+        ) {
+            String inputLine;
+            while ((inputLine = inputbufferedReader.readLine()) != null) {
+                output.append(inputLine).append("\n");
+            }
+
+            String errorLine;
+            while ((errorLine = errorBufferedReader.readLine()) != null) {
+                errorOutput.append(errorLine).append("\n");
+            }
+        }
+
+        // Wait for the process to finish
+        try {
+            int exitCode = process.waitFor();
+            System.out.println("Python script exited with code: " + exitCode);
+
+            if (exitCode == 0) {
+                // If there is no error, return the output as a String
+                System.out.println(errorOutput.toString().trim());
+                return output.toString().trim();
+            } else {
+                // If there is an error, print the error and throw an exception
+                System.err.println("Error output:\n" + errorOutput.toString().trim());
+                if (pythonCalledBy == GENERATE.getValue())
+                    throw new GenerationException();
+                else
+                    throw new UpscalingException();
+            }
+
+        } catch (InterruptedException e) {
+            if (pythonCalledBy == GENERATE.getValue())
+                throw new GenerationException();
+            else
+                throw new UpscalingException();
+        }
+    }
+
+    @Override
+    public String callPythonScript(String prompt, String date) throws IOException, GenerationException {
+        try {
+            return callPythonScript(prompt, date, null);
+
+            // called by OnCreateClick(), you can't get an UpscalingException
+        } catch (UpscalingException ignored) {}
+
+        return ERROR.getCode();
+    }
+
+    @Override
+    public String callPythonScript(Image image) throws IOException, UpscalingException {
+        try {
+            return callPythonScript(null, null, image);
+
+            // called by OnUpscaleStartClick(), you can't get a GenerationException
+        } catch (GenerationException ignored) {}
+
+        return ERROR.getCode();
+    }
+
+    private String countGeneratedImgs() {
+        User user = diffApp.getUser();
+        int num = user.countGeneratedImgs();
+        String startText = "You have generated ";
+        String endText;
+
+        if (num == 1)
+            endText = " image so far.";
+        else
+            endText = " images so far.";
+
+        return startText + num + endText;
+    }
+
+    private String countUpscaledImgs() {
+        User user = diffApp.getUser();
+        String startText = "You have upscaled ";
+        String endText = " images so far.";
+
+        return startText + user.getUpscImgsNum() + endText;
+    }
+
+    private String updateProcessingLabel() {
+        return "Preview";
+    }
+
+    private boolean isImageFile(File file) {
+        try {
+            // Attempt to load the file as an image
+            Image image = new Image(file.toURI().toString());
+            return !image.isError(); // If loading succeeds, it's an image
+        } catch (Exception e) {
+            return false; // If loading fails, it's not an image
+        }
+    }
+
+    private int checkAvailableSpace() {
+        if (!firstImagePane.isVisible())
+            return 0;
+        if (!secondImagePane.isVisible())
+            return 1;
+        if (!thirdImagePane.isVisible())
+            return 2;
+
+        return MAX_CAPACITY.getValue();
+    }
+
+    private void enableAllButtons() {
+        firstStartButton.setVisible(true);
+        firstDeleteButton.setVisible(true);
+        secondStartButton.setVisible(true);
+        secondDeleteButton.setVisible(true);
+        thirdStartButton.setVisible(true);
+        thirdDeleteButton.setVisible(true);
+    }
+
+    private void disableAllButtons() {
+        firstStartButton.setVisible(false);
+        firstDeleteButton.setVisible(false);
+        secondStartButton.setVisible(false);
+        secondDeleteButton.setVisible(false);
+        thirdStartButton.setVisible(false);
+        thirdDeleteButton.setVisible(false);
     }
 }

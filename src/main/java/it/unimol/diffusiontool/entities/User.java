@@ -95,6 +95,8 @@ public class User {
         this.generatedImages.add(image);
     }
 
+    public void incUpscaledImages() {this.upscImgsNum++;}
+
     public String toString() {
         return "User {\n id='" + this.id + "',\n email='" + this.email + "',\n username='"
                 + this.username + "',\n password='" + this.password + "',\n birthDate="

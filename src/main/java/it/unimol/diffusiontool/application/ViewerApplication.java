@@ -22,6 +22,9 @@ public class ViewerApplication extends Application {
     }
 
     public static ViewerApplication getInstance() {
+        if (instance == null)
+            instance = new ViewerApplication();
+
         return instance;
     }
 

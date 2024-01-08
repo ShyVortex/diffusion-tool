@@ -1,4 +1,4 @@
-package it.unimol.diffusiontool.threads.interfaces;
+package it.unimol.diffusiontool.interfaces;
 
 import it.unimol.diffusiontool.threads.StoppableThread;
 
@@ -11,6 +11,8 @@ import it.unimol.diffusiontool.threads.StoppableThread;
  */
 
 public interface Stoppable {
+    boolean isRunning();
+
     /**
      * It defines the stop of execution of a {@link StoppableThread}.
      *

@@ -78,6 +78,11 @@
             <TextArea fx:id="firstTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0" />
             <Button fx:id="firstStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleStartClick" text="Start" />
             <Button fx:id="firstDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleDeleteClick" text="Delete" />
+            <Label fx:id="firstProcessLabel" layoutX="324.0" layoutY="106.0" text="Processing..." visible="false">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
             <Button fx:id="firstShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleShowClick" text="Show" visible="false" />
          </Pane>
          <Pane fx:id="secondImagePane" layoutY="145.0" prefHeight="155.0" prefWidth="981.0" visible="false">
@@ -85,6 +90,11 @@
             <TextArea fx:id="secondTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0" />
             <Button fx:id="secondStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleStartClick" text="Start" />
             <Button fx:id="secondDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleDeleteClick" text="Delete" />
+            <Label fx:id="secondProcessLabel" layoutX="324.0" layoutY="106.0" text="Processing..." visible="false">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
             <Button fx:id="secondShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleShowClick" text="Show" visible="false" />
          </Pane>
          <Pane fx:id="thirdImagePane" layoutY="290.0" prefHeight="155.0" prefWidth="981.0" visible="false">
@@ -92,6 +102,11 @@
             <TextArea fx:id="thirdTextArea" layoutX="194.0" layoutY="43.0" prefHeight="50.0" prefWidth="714.0" />
             <Button fx:id="thirdStartButton" layoutX="194.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleStartClick" text="Start" />
             <Button fx:id="thirdDeleteButton" layoutX="255.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleDeleteClick" text="Delete" />
+            <Label fx:id="thirdProcessLabel" layoutX="324.0" layoutY="106.0" text="Processing..." visible="false">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
             <Button fx:id="thirdShowButton" layoutX="854.0" layoutY="103.0" mnemonicParsing="false" onAction="#OnUpscaleShowClick" text="Show" visible="false" />
          </Pane>
       </Pane>

@@ -1,6 +1,6 @@
 package it.unimol.diffusiontool.threads;
 
-import it.unimol.diffusiontool.threads.interfaces.Stoppable;
+import it.unimol.diffusiontool.interfaces.Stoppable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -49,6 +49,7 @@ public class StoppableThread extends Thread implements Stoppable {
      * @return A casting of the atomic boolean variable to a boolean one through the method {@link AtomicBoolean#get()}
      * of the execution flag.
      */
+    @Override
     public boolean isRunning() {
         return this.running.get();
     }
