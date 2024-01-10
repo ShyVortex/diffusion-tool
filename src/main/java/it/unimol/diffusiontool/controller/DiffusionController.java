@@ -30,10 +30,16 @@ import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static it.unimol.diffusiontool.properties.GeneralProperties.*;
@@ -47,11 +53,11 @@ public class DiffusionController implements Pythonable {
     private final SimpleObjectProperty<Image> firstUpsImgProperty = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<Image> secondUpsImgProperty = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<Image> thirdUpsImgProperty = new SimpleObjectProperty<>();
+    private final List<Image> upscaledImages = new ArrayList<>(3);
     private int activeImages;
     private int mutex;
     private int pythonCalledBy;
     private String formattedDate;
-    private List<Image> upscaledImages;
     @FXML
     private Label userLabel;
     @FXML
@@ -192,7 +198,6 @@ public class DiffusionController implements Pythonable {
     @FXML
     private void initialize() {
         pythonCalledBy = NULL.getValue();
-        upscaledImages = new ArrayList<>(3);
         userLabel.textProperty().bind(Bindings.createStringBinding(this::getLoggedInUser));
 
         if (diffApp.getCurrentFXML().equals(FXMLProperties.getInstance().getHomeFXML()))
@@ -236,9 +241,15 @@ public class DiffusionController implements Pythonable {
         activeImages = 0;
         mutex = AVAILABLE.getValue();
 
+        initImagesList();
         profileButton.setBackground(null);
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         homeUserImage.imageProperty().bind(profilePicProperty);
+    }
+
+    private void initImagesList() {
+        for (int i = 0; i < MAX_CAPACITY.getValue(); i++)
+            upscaledImages.add(null);
     }
 
     @FXML
@@ -575,7 +586,10 @@ public class DiffusionController implements Pythonable {
                         base64EncodedImage.set(callPythonScript(prompt, formattedDate));
                         StoppableThread.currentThread().stop(StoppableThread.currentThread());
                     } catch (IOException | GenerationException e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
+                        throwGenericAlert();
+                        pythonCalledBy = NULL.getValue();
+                        processingLabel.setVisible(false);
                     }
                 });
                 pyThread.start();
@@ -614,10 +628,8 @@ public class DiffusionController implements Pythonable {
                 updateThread.start();
 
             } catch (Exception e) {
-                Alert genAlert = new Alert(Alert.AlertType.ERROR);
-                genAlert.setHeaderText("ERROR: Generation Failure");
-                genAlert.setContentText("Something went wrong in the image creation. Please retry");
-                genAlert.showAndWait();
+                e.printStackTrace();
+                throwGenericAlert();
                 pythonCalledBy = NULL.getValue();
                 processingLabel.setVisible(false);
             }
@@ -682,32 +694,36 @@ public class DiffusionController implements Pythonable {
 
                     if (file != null) {
                         if (isImageFile(file)) {
-                            activeImages++;
-                            Image image = new Image(file.toURI().toString());
-                            int isSpaceAvailable = checkAvailableSpace();
+                            if (getFileSize(file) <= 5120) {
+                                activeImages++;
+                                Image image = new Image(file.toURI().toString());
+                                int isSpaceAvailable = checkAvailableSpace();
 
-                            switch (isSpaceAvailable) {
-                                case 0:
-                                    firstImagePane.setVisible(true);
-                                    firstUpsImgProperty.set(image);
-                                    firstImgView.imageProperty().bind(firstUpsImgProperty);
-                                    break;
+                                switch (isSpaceAvailable) {
+                                    case 0:
+                                        firstImagePane.setVisible(true);
+                                        firstUpsImgProperty.set(image);
+                                        firstImgView.imageProperty().bind(firstUpsImgProperty);
+                                        break;
 
-                                case 1:
-                                    secondImagePane.setVisible(true);
-                                    secondUpsImgProperty.set(image);
-                                    secondImgView.imageProperty().bind(secondUpsImgProperty);
-                                    break;
+                                    case 1:
+                                        secondImagePane.setVisible(true);
+                                        secondUpsImgProperty.set(image);
+                                        secondImgView.imageProperty().bind(secondUpsImgProperty);
+                                        break;
 
-                                case 2:
-                                    thirdImagePane.setVisible(true);
-                                    thirdUpsImgProperty.set(image);
-                                    thirdImgView.imageProperty().bind(thirdUpsImgProperty);
-                                    break;
+                                    case 2:
+                                        thirdImagePane.setVisible(true);
+                                        thirdUpsImgProperty.set(image);
+                                        thirdImgView.imageProperty().bind(thirdUpsImgProperty);
+                                        break;
 
-                                case 3:
-                                    throw new MaxCapacityException();
-                            }
+                                    case 3:
+                                        throw new MaxCapacityException();
+                                }
+
+                            } else
+                                throw new SizeLimitException();
 
                         } else
                             throw new InvalidObjectException("Not an image");
@@ -718,6 +734,13 @@ public class DiffusionController implements Pythonable {
                     invObjAlert.setHeaderText("ERROR: Not an Image");
                     invObjAlert.setContentText("The selected file is not an image. Please retry.");
                     invObjAlert.showAndWait();
+                } catch (SizeLimitException e) {
+                    Alert invObjAlert = new Alert(Alert.AlertType.ERROR);
+                    invObjAlert.setHeaderText("ERROR: File Size Exceeded");
+                    invObjAlert.setContentText("The selected file is too big. Please compress it.");
+                    invObjAlert.showAndWait();
+                } catch (FileNotFoundException ignored) {
+                    // If the file is null no image is selected, so we can just skip
                 }
 
             } else
@@ -775,22 +798,34 @@ public class DiffusionController implements Pythonable {
                 if (upscaledImages.get(index) != null)
                     throw new DuplicatedActionException();
 
+                String imgPath = getImagePath(validImage);
+
                 StoppableThread processingThread = new StoppableThread(() -> {
                     validLabel.setVisible(true);
                     disableAllButtons();
+                    StoppableThread.currentThread().stop(StoppableThread.currentThread());
                 });
                 processingThread.start();
 
                 try {
-                    processingThread.stop(processingThread);
                     pythonCalledBy = UPSCALE.getValue();
                     AtomicReference<String> base64EncodedImage = new AtomicReference<>();
                     StoppableThread pyThread = new StoppableThread(() -> {
-                        try {
-                            base64EncodedImage.set(callPythonScript(validImage));
-                            StoppableThread.currentThread().stop(StoppableThread.currentThread());
-                        } catch (IOException | UpscalingException e) {
-                            throw new RuntimeException(e);
+                        while (true) {
+                            try {
+                                if (!processingThread.isAlive()) {
+                                    base64EncodedImage.set(callPythonScript(imgPath));
+                                    StoppableThread.currentThread().stop(StoppableThread.currentThread());
+                                    break;
+                                }
+                            } catch (IOException | UpscalingException e) {
+                                e.printStackTrace();
+                                throwGenericAlert();
+                                validLabel.setVisible(false);
+                                pythonCalledBy = NULL.getValue();
+                                enableAllButtons();
+                                mutex = AVAILABLE.getValue();
+                            }
                         }
                     });
                     pyThread.start();
@@ -827,10 +862,8 @@ public class DiffusionController implements Pythonable {
                     updateThread.start();
 
                 } catch (Exception e) {
-                    Alert genAlert = new Alert(Alert.AlertType.ERROR);
-                    genAlert.setHeaderText("ERROR: Upscaling Failure");
-                    genAlert.setContentText("Something went wrong in the image upscaling. Please retry");
-                    genAlert.showAndWait();
+                    e.printStackTrace();
+                    throwGenericAlert();
                     validLabel.setVisible(false);
                     pythonCalledBy = NULL.getValue();
                     enableAllButtons();
@@ -884,13 +917,13 @@ public class DiffusionController implements Pythonable {
     }
 
     @Override
-    public String callPythonScript(String prompt, String date, Image image) throws IOException, GenerationException,
+    public String callPythonScript(String prompt, String date, String path) throws IOException, GenerationException,
             UpscalingException
     {
         String activateScriptPath = "venv/bin/python";
         String pythonScriptPath;
         StringBuilder output = new StringBuilder();
-        StringBuilder errorOutput = new StringBuilder();
+        StringBuilder execOutput = new StringBuilder();
 
         pythonScriptPath = switch (pythonCalledBy) {
             case 1 -> "src/main/python/it/unimol/diffusiontool/generate.py";
@@ -899,58 +932,77 @@ public class DiffusionController implements Pythonable {
         };
 
         // Construct the command to execute
-        List<String> generateCommand = List.of (
-                activateScriptPath,      // Activate virtual environment
-                pythonScriptPath,        // Path to the Python script
-                prompt,                  // Prompt argument
-                date                    // Date argument
-        );
+        List<String> generateCommand;
+        List<String> upscaleCommand;
+        ProcessBuilder processBuilder;
 
-        List<String> upscaleCommand = List.of (
-                activateScriptPath,
-                pythonScriptPath
-        );
+        if (pythonCalledBy == GENERATE.getValue()) {
+            generateCommand = List.of (
+                    activateScriptPath,      // Activate virtual environment
+                    pythonScriptPath,        // Path to the Python script
+                    prompt,                  // Prompt argument
+                    date                    // Date argument
+            );
+            processBuilder = new ProcessBuilder(generateCommand);
+        }
+        else {
+            upscaleCommand = List.of (
+                    activateScriptPath,
+                    pythonScriptPath,
+                    path, // Image path argument
+                    date
+            );
+            processBuilder = new ProcessBuilder(upscaleCommand);
+        }
 
         // Start the process
-        ProcessBuilder processBuilder;
-        if (pythonCalledBy == GENERATE.getValue())
-            processBuilder = new ProcessBuilder(generateCommand);
-        else
-            processBuilder = new ProcessBuilder(upscaleCommand);
         Process process = processBuilder.start();
 
-        // Capture and print the error stream
+                /* Concurrently read execution output
+            (what is being printed automatically by the algorithm during its execution) */
+        Thread executionPrinter = new Thread(() -> {
+            try (
+                    BufferedReader execBufferedReader = new BufferedReader(new InputStreamReader(
+                            process.getErrorStream()))
+            ) {
+                String executionLine;
+
+                // ANSI escape codes (may not work on all shells)
+                String yellowColor = "\u001B[33m";
+                String resetColor = "\u001B[0m";
+
+                while ((executionLine = execBufferedReader.readLine()) != null) {
+                    execOutput.append(executionLine).append("\n");
+                    System.out.println(yellowColor + executionLine.trim() + resetColor);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        executionPrinter.start();
+
+        // Capture the input stream (what is being manually printed to console by the Python script)
         try (
                 InputStream inputStream = process.getInputStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader inputbufferedReader = new BufferedReader(inputStreamReader);
-                InputStream errorStream = process.getErrorStream();
-                InputStreamReader errorStreamReader = new InputStreamReader(errorStream);
-                BufferedReader errorBufferedReader = new BufferedReader(errorStreamReader)
         ) {
             String inputLine;
             while ((inputLine = inputbufferedReader.readLine()) != null) {
                 output.append(inputLine).append("\n");
-            }
-
-            String errorLine;
-            while ((errorLine = errorBufferedReader.readLine()) != null) {
-                errorOutput.append(errorLine).append("\n");
             }
         }
 
         // Wait for the process to finish
         try {
             int exitCode = process.waitFor();
-            System.out.println("Python script exited with code: " + exitCode);
+            System.out.println("\nPython script exited with code: " + exitCode);
 
             if (exitCode == 0) {
                 // If there is no error, return the output as a String
-                System.out.println(errorOutput.toString().trim());
                 return output.toString().trim();
             } else {
-                // If there is an error, print the error and throw an exception
-                System.err.println("Error output:\n" + errorOutput.toString().trim());
+                // If there is an error, throw the appropriate exception
                 if (pythonCalledBy == GENERATE.getValue())
                     throw new GenerationException();
                 else
@@ -977,9 +1029,13 @@ public class DiffusionController implements Pythonable {
     }
 
     @Override
-    public String callPythonScript(Image image) throws IOException, UpscalingException {
+    public String callPythonScript(String imgPath) throws IOException, UpscalingException {
+        LocalDateTime currentDate = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        formattedDate = currentDate.format(formatter);
+
         try {
-            return callPythonScript(null, null, image);
+            return callPythonScript("", formattedDate, imgPath);
 
             // called by OnUpscaleStartClick(), you can't get a GenerationException
         } catch (GenerationException ignored) {}
@@ -1023,6 +1079,33 @@ public class DiffusionController implements Pythonable {
         }
     }
 
+    private double getFileSize(File file) throws FileNotFoundException {
+        if (file.exists()) {
+            long fileSizeInBytes = file.length();
+
+            // Convert bytes to kilobytes, megabytes, or gigabytes if needed
+            double fileSizeInKB = fileSizeInBytes / 1024.0;
+          /*  double fileSizeInMB = fileSizeInKB / 1024.0;
+            double fileSizeInGB = fileSizeInMB / 1024.0; */
+
+            return fileSizeInKB;
+        } else
+            throw new FileNotFoundException();
+    }
+
+    public void throwGenericAlert() {
+        Alert genAlert = new Alert(Alert.AlertType.ERROR);
+
+        if (pythonCalledBy == GENERATE.getValue()) {
+            genAlert.setHeaderText("ERROR: Generation Failure");
+            genAlert.setContentText("Something went wrong in the image creation. Please retry");
+        } else {
+            genAlert.setHeaderText("ERROR: Upscaling Failure");
+            genAlert.setContentText("Something went wrong in the image upscaling. Please retry");
+        }
+        genAlert.showAndWait();
+    }
+
     private int checkAvailableSpace() {
         if (!firstImagePane.isVisible())
             return 0;
@@ -1050,5 +1133,23 @@ public class DiffusionController implements Pythonable {
         secondDeleteButton.setVisible(false);
         thirdStartButton.setVisible(false);
         thirdDeleteButton.setVisible(false);
+    }
+
+    private String getImagePath(Image image) {
+        String imageUrl = image.getUrl();
+        String[] pathArgs = imageUrl.split("file:");
+
+        return pathArgs[1];
+    }
+
+    private String encodeImage(Image image) throws IOException {
+        String imageUrl = image.getUrl();
+        String[] pathArgs = imageUrl.split("file:");
+        Path imagePath = Paths.get(pathArgs[1]);
+
+        byte[] imageBytes = Files.readAllBytes(imagePath);
+        String encodedImage = Base64.getEncoder().encodeToString(imageBytes);
+
+        return encodedImage;
     }
 }

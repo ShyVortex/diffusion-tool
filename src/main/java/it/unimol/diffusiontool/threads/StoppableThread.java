@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 public class StoppableThread extends Thread implements Stoppable {
-    private final AtomicBoolean running = new AtomicBoolean(false); // A thread needs to be stopped in an atomic way
+    private final AtomicBoolean running = new AtomicBoolean(); // A thread needs to be stopped in an atomic way
     /* An atomic termination makes sure that the thread is executed fully before being stopped. */
     private Runnable instance;
     private static StoppableThread thisThread;
