@@ -57,6 +57,7 @@ public class DiffusionController implements Pythonable {
     private int activeImages;
     private int mutex;
     private int pythonCalledBy;
+    private boolean includeUpscaling;
     private String formattedDate;
     @FXML
     private Label userLabel;
@@ -126,6 +127,8 @@ public class DiffusionController implements Pythonable {
     private Button promptResetButton;
     @FXML
     private Button createButton;
+    @FXML
+    private CheckBox upscaleCheckBox;
     @FXML
     private Label processingLabel;
     @FXML
@@ -556,6 +559,12 @@ public class DiffusionController implements Pythonable {
     }
 
     @FXML
+    private void OnCheckBoxClick() {
+        // if checkbox is selected, includeUpscaling = true, false otherwise
+        includeUpscaling = upscaleCheckBox.isSelected();
+    }
+
+    @FXML
     private void OnPromptResetClick() {
         promptArea.setText("");
         tagsField.setText("");
@@ -583,7 +592,7 @@ public class DiffusionController implements Pythonable {
                 AtomicReference<String> base64EncodedImage = new AtomicReference<>();
                 StoppableThread pyThread = new StoppableThread(() -> {
                     try {
-                        base64EncodedImage.set(callPythonScript(prompt, formattedDate));
+                        base64EncodedImage.set(callPythonScript(prompt, tags, formattedDate));
                         StoppableThread.currentThread().stop(StoppableThread.currentThread());
                     } catch (IOException | GenerationException e) {
                         e.printStackTrace();
@@ -643,7 +652,7 @@ public class DiffusionController implements Pythonable {
     }
 
     @FXML
-    private void OnImageDeleteClick() throws IOException {
+    private void OnGenerateDeleteClick() throws IOException {
         User user = diffApp.getUser();
         Image image = Iterables.getLast(user.getGeneratedImages());
         File imageFile = new File(String.valueOf(image));
@@ -672,9 +681,11 @@ public class DiffusionController implements Pythonable {
     }
 
     @FXML
-    private void OnImageShowClick() throws Exception {
+    private void OnGenerateShowClick() throws Exception {
         Image image = Iterables.getLast(diffApp.getUser().getGeneratedImages());
 
+        viewerApp.setGenerated(true);
+        viewerApp.setUpscaled(includeUpscaling);
         viewerApp.setExportedImage(image);
         viewerApp.init();
         viewerApp.start(new Stage());
@@ -694,27 +705,35 @@ public class DiffusionController implements Pythonable {
 
                     if (file != null) {
                         if (isImageFile(file)) {
-                            if (getFileSize(file) <= 5120) {
+                            double size = getFileSize(file);
+                            if (size <= 5120) {
                                 activeImages++;
                                 Image image = new Image(file.toURI().toString());
+                                String name = file.getName();
                                 int isSpaceAvailable = checkAvailableSpace();
 
                                 switch (isSpaceAvailable) {
                                     case 0:
                                         firstImagePane.setVisible(true);
                                         firstUpsImgProperty.set(image);
+                                        firstTextArea.textProperty().bind(Bindings.createStringBinding(
+                                                () -> getImageProperties(name, image, size)));
                                         firstImgView.imageProperty().bind(firstUpsImgProperty);
                                         break;
 
                                     case 1:
                                         secondImagePane.setVisible(true);
                                         secondUpsImgProperty.set(image);
+                                        secondTextArea.textProperty().bind(Bindings.createStringBinding(
+                                                () -> getImageProperties(name, image, size)));
                                         secondImgView.imageProperty().bind(secondUpsImgProperty);
                                         break;
 
                                     case 2:
                                         thirdImagePane.setVisible(true);
                                         thirdUpsImgProperty.set(image);
+                                        thirdTextArea.textProperty().bind(Bindings.createStringBinding(
+                                                () -> getImageProperties(name, image, size)));
                                         thirdImgView.imageProperty().bind(thirdUpsImgProperty);
                                         break;
 
@@ -891,20 +910,32 @@ public class DiffusionController implements Pythonable {
         Button clickedButton = (Button) event.getSource();
 
         if (clickedButton.equals(firstDeleteButton)) {
-            if (upscaledImages.get(0) != null)
+            if (upscaledImages.get(0) != null) {
                 upscaledImages.set(0, null);
+                firstShowButton.setVisible(false);
+            }
+            firstTextArea.textProperty().unbind();
+            firstTextArea.textProperty().set("");
             firstImgView.imageProperty().unbind();
             firstImagePane.setVisible(false);
             activeImages--;
         } else if (clickedButton.equals(secondDeleteButton)) {
-            if (upscaledImages.get(1) != null)
+            if (upscaledImages.get(1) != null) {
                 upscaledImages.set(1, null);
+                secondShowButton.setVisible(false);
+            }
+            secondTextArea.textProperty().unbind();
+            secondTextArea.textProperty().set("");
             secondImgView.imageProperty().unbind();
             secondImagePane.setVisible(false);
             activeImages--;
         } else if (clickedButton.equals(thirdDeleteButton)) {
-            if (upscaledImages.get(2) != null)
+            if (upscaledImages.get(2) != null) {
                 upscaledImages.set(2, null);
+                thirdShowButton.setVisible(false);
+            }
+            thirdTextArea.textProperty().unbind();
+            thirdTextArea.textProperty().set("");
             thirdImgView.imageProperty().unbind();
             thirdImagePane.setVisible(false);
             activeImages--;
@@ -912,24 +943,47 @@ public class DiffusionController implements Pythonable {
     }
 
     @FXML
-    private void OnUpscaleShowClick() {
+    private void OnUpscaleShowClick(ActionEvent event) throws Exception {
+        Button clickedButton = (Button) event.getSource();
+        Image relativeImg = null;
 
+        if (clickedButton.equals(firstShowButton))
+            relativeImg = upscaledImages.get(0);
+        else if (clickedButton.equals(secondShowButton))
+            relativeImg = upscaledImages.get(1);
+        else if (clickedButton.equals(thirdStartButton))
+            relativeImg = upscaledImages.get(2);
+
+        viewerApp.setGenerated(true);
+        viewerApp.setExportedImage(relativeImg);
+        viewerApp.init();
+        viewerApp.start(new Stage());
     }
 
     @Override
-    public String callPythonScript(String prompt, String date, String path) throws IOException, GenerationException,
-            UpscalingException
+    public String callPythonScript(String prompt, String tags, String date, String path) throws IOException,
+            GenerationException, UpscalingException
     {
         String activateScriptPath = "venv/bin/python";
         String pythonScriptPath;
         StringBuilder output = new StringBuilder();
         StringBuilder execOutput = new StringBuilder();
 
-        pythonScriptPath = switch (pythonCalledBy) {
-            case 1 -> "src/main/python/it/unimol/diffusiontool/generate.py";
-            case 2 -> "src/main/python/it/unimol/diffusiontool/upscale.py";
-            default -> ERROR.getCode();
-        };
+        switch (pythonCalledBy) {
+            case 1:
+                if (!includeUpscaling)
+                    pythonScriptPath = "src/main/python/it/unimol/diffusiontool/generate.py";
+                else
+                    pythonScriptPath = "src/main/python/it/unimol/diffusiontool/generate_upscale.py";
+                break;
+
+            case 2:
+                pythonScriptPath = "src/main/python/it/unimol/diffusiontool/upscale.py";
+                break;
+
+            default:
+                return ERROR.getCode();
+        }
 
         // Construct the command to execute
         List<String> generateCommand;
@@ -941,6 +995,7 @@ public class DiffusionController implements Pythonable {
                     activateScriptPath,      // Activate virtual environment
                     pythonScriptPath,        // Path to the Python script
                     prompt,                  // Prompt argument
+                    tags,                   // Tags argument
                     date                    // Date argument
             );
             processBuilder = new ProcessBuilder(generateCommand);
@@ -1018,9 +1073,9 @@ public class DiffusionController implements Pythonable {
     }
 
     @Override
-    public String callPythonScript(String prompt, String date) throws IOException, GenerationException {
+    public String callPythonScript(String prompt, String tags, String date) throws IOException, GenerationException {
         try {
-            return callPythonScript(prompt, date, null);
+            return callPythonScript(prompt, tags, date, null);
 
             // called by OnCreateClick(), you can't get an UpscalingException
         } catch (UpscalingException ignored) {}
@@ -1035,7 +1090,7 @@ public class DiffusionController implements Pythonable {
         formattedDate = currentDate.format(formatter);
 
         try {
-            return callPythonScript("", formattedDate, imgPath);
+            return callPythonScript("", null, formattedDate, imgPath);
 
             // called by OnUpscaleStartClick(), you can't get a GenerationException
         } catch (GenerationException ignored) {}
@@ -1091,6 +1146,25 @@ public class DiffusionController implements Pythonable {
             return fileSizeInKB;
         } else
             throw new FileNotFoundException();
+    }
+
+    private String getImageProperties(String name, Image image, double size) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        String resX = Integer.toString((int) image.getWidth());
+        String resY = Integer.toString((int) image.getHeight());
+        String sizeStr = String.format("%.2f", size); // sets precision to 2nd decimal digit
+
+        stringBuilder.append(resX)
+                .append("x")
+                .append(resY)
+                .append("px")
+                .append(" | ")
+                .append(sizeStr)
+                .append(" KB | ")
+                .append(name);
+
+        return stringBuilder.toString();
     }
 
     public void throwGenericAlert() {

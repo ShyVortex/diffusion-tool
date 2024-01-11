@@ -30,31 +30,20 @@ def main():
 
     model = prepare_AI_model(device)
 
+    # Set output path
     result_folder = os.path.abspath("result/upscaled")
     result_filename = f"upscaled_image_{date}.png"
     result_path = os.path.join(result_folder, result_filename)
 
+    # Convert and upscale image
     img_adapted = adapt_image_for_deeplearning(img, device)
     img_upscaled = tensor_to_uint(model(img_adapted))
 
+    # Save image and encode it to string
     save_image(img_upscaled, result_path)
-
     with open(result_path, "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
     print(encoded_image)
-
-
-def decode_base64_image(base64_string):
-    # Extract the base64 data
-    img_data = base64.b64decode(base64_string)
-
-    # Create a BytesIO object to treat the data as a file-like object
-    img_buffer = BytesIO(img_data)
-
-    # Open the image using PIL
-    image = Image.open(img_buffer)
-
-    return image
 
 
 def make_layer(block, n_layers):

@@ -6,8 +6,8 @@ import it.unimol.diffusiontool.exceptions.UpscalingException;
 import java.io.IOException;
 
 public interface Pythonable {
-    String callPythonScript(String prompt, String date, String img) throws IOException, GenerationException,
-            UpscalingException;
-    String callPythonScript(String prompt, String date) throws IOException, GenerationException;
+    String callPythonScript(String prompt, String tags, String date, String img) throws IOException,
+            GenerationException, UpscalingException;
+    String callPythonScript(String prompt, String tags, String date) throws IOException, GenerationException;
     String callPythonScript(String img) throws IOException, UpscalingException;
 }

@@ -6,9 +6,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class ViewerApplication extends Application {
+    private double validWidth;
+    private double validHeight;
+    private boolean isGenerated;
+    private boolean isUpscaled;
     private Image exportedImg;
     private Parent rootNode;
     private Stage stage;
@@ -28,6 +33,14 @@ public class ViewerApplication extends Application {
         return instance;
     }
 
+    public double getValidWidth() {
+        return validWidth;
+    }
+
+    public double getValidHeight() {
+        return validHeight;
+    }
+
     public Image getExportedImage() {
         return exportedImg;
     }
@@ -38,6 +51,22 @@ public class ViewerApplication extends Application {
 
     public Stage getStage() {
         return stage;
+    }
+
+    public void setValidWidth(double width) {
+        this.validWidth = width;
+    }
+
+    public void setValidHeight(double height) {
+        this.validHeight = height;
+    }
+
+    public void setGenerated(boolean generated) {
+        isGenerated = generated;
+    }
+
+    public void setUpscaled(boolean upscaled) {
+        isUpscaled = upscaled;
     }
 
     public void setExportedImage(Image exportedImg) {
@@ -55,7 +84,39 @@ public class ViewerApplication extends Application {
     }
 
     public void start(Stage stage) {
-        stage.setScene(new Scene(this.rootNode));
+        Scene scene = new Scene(this.rootNode);
+        stage.setScene(scene);
+
+        if (!isGenerated) {
+            // Get monitor resolution
+            Screen primaryScreen = Screen.getPrimary();
+            double screenWidth = primaryScreen.getBounds().getWidth();
+            double screenHeight = primaryScreen.getBounds().getHeight();
+
+            // If image exceeds maximum resolution, resize it
+            validWidth = exportedImg.getWidth();
+            validHeight = exportedImg.getHeight();
+            while (validHeight > screenWidth || validHeight > screenHeight) {
+                validWidth -= (exportedImg.getWidth() - exportedImg.getWidth() / 1.5);
+                validHeight -= (exportedImg.getHeight() - exportedImg.getHeight() / 1.5);
+            }
+
+            // Set stage resolution accordingly
+            stage.setMaxWidth(screenWidth);
+            stage.setMaxHeight(screenHeight);
+            stage.setWidth(validWidth);
+            stage.setHeight(validHeight);
+
+        } else {
+            if (isUpscaled) {
+                stage.setWidth(768);
+                stage.setHeight(768);
+            } else {
+                stage.setWidth(512);
+                stage.setHeight(512);
+            }
+        }
+
         stage.setResizable(false);
         stage.show();
         this.stage = stage;
