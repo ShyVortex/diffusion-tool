@@ -900,8 +900,10 @@ public class DiffusionController implements Pythonable {
         } catch (DuplicatedActionException e) {
             Alert daAlert = new Alert(Alert.AlertType.ERROR);
             daAlert.setHeaderText("ERROR: Duplicated Action");
-            daAlert.setContentText("The image ");
+            daAlert.setContentText("This image has already been upscaled. If you wish to repeat the process, please" +
+                    " delete it first.");
             daAlert.showAndWait();
+            mutex = AVAILABLE.getValue();
         }
     }
 
@@ -954,7 +956,7 @@ public class DiffusionController implements Pythonable {
         else if (clickedButton.equals(thirdStartButton))
             relativeImg = upscaledImages.get(2);
 
-        viewerApp.setGenerated(true);
+        viewerApp.setGenerated(false);
         viewerApp.setExportedImage(relativeImg);
         viewerApp.init();
         viewerApp.start(new Stage());

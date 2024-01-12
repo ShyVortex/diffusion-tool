@@ -97,11 +97,13 @@ public class ViewerApplication extends Application {
             validWidth = exportedImg.getWidth();
             validHeight = exportedImg.getHeight();
             while (validHeight > screenWidth || validHeight > screenHeight) {
-                validWidth -= (exportedImg.getWidth() - exportedImg.getWidth() / 1.5);
-                validHeight -= (exportedImg.getHeight() - exportedImg.getHeight() / 1.5);
+                validWidth -= (exportedImg.getWidth() - exportedImg.getWidth() / 1.35);
+                validHeight -= (exportedImg.getHeight() - exportedImg.getHeight() / 1.35);
             }
 
             // Set stage resolution accordingly
+            stage.setMinWidth(100);
+            stage.setMinHeight(100);
             stage.setMaxWidth(screenWidth);
             stage.setMaxHeight(screenHeight);
             stage.setWidth(validWidth);
@@ -117,7 +119,7 @@ public class ViewerApplication extends Application {
             }
         }
 
-        stage.setResizable(false);
+        stage.setResizable(!isGenerated);
         stage.show();
         this.stage = stage;
     }

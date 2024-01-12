@@ -10,7 +10,7 @@ import base64
 
 def main():
     if len(sys.argv) != 3:
-        print("Usage: python enhanced_upscale.py <base64EncodedImage> <date>")
+        print("Usage: python diffx4_upscale.py <base64EncodedImage> <date>")
         sys.exit(1)
 
     encoded_input_image = sys.argv[1]
