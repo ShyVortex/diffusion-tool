@@ -37,9 +37,14 @@ def main():
 
     # Convert and upscale image
     img_adapted = adapt_image_for_deeplearning(img, device)
-    img_upscaled = tensor_to_uint(model(img_adapted))
+    try:
+        img_upscaled = tensor_to_uint(model(img_adapted))
+    except torch.cuda.OutOfMemoryError:
+        print("OUT OF MEMORY")
+        exit()
 
-    # Save image and encode it to string
+    # Clear memory, save image and encode it to string
+    torch.cuda.empty_cache()
     save_image(img_upscaled, result_path)
     with open(result_path, "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')

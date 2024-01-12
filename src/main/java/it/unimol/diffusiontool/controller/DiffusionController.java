@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static it.unimol.diffusiontool.properties.GeneralProperties.*;
@@ -826,24 +827,47 @@ public class DiffusionController implements Pythonable {
                 });
                 processingThread.start();
 
+                // boolean variables for exception handling
+                AtomicBoolean isAlertShown = new AtomicBoolean();
+                AtomicBoolean isOutOfMemory = new AtomicBoolean();
+
                 try {
                     pythonCalledBy = UPSCALE.getValue();
                     AtomicReference<String> base64EncodedImage = new AtomicReference<>();
                     StoppableThread pyThread = new StoppableThread(() -> {
-                        while (true) {
+                        while (!isOutOfMemory.get() && !isAlertShown.get()) {
                             try {
                                 if (!processingThread.isAlive()) {
                                     base64EncodedImage.set(callPythonScript(imgPath));
+                                    if (base64EncodedImage.get().equals("OUT OF MEMORY")) {
+                                        isOutOfMemory.set(true);
+                                        throw new OutOfMemoryError();
+                                    }
                                     StoppableThread.currentThread().stop(StoppableThread.currentThread());
                                     break;
                                 }
                             } catch (IOException | UpscalingException e) {
-                                e.printStackTrace();
-                                throwGenericAlert();
-                                validLabel.setVisible(false);
-                                pythonCalledBy = NULL.getValue();
-                                enableAllButtons();
-                                mutex = AVAILABLE.getValue();
+                                isAlertShown.set(true);
+                                Platform.runLater(() -> {
+                                    throwGenericAlert();
+                                    validLabel.setVisible(false);
+                                    pythonCalledBy = NULL.getValue();
+                                    enableAllButtons();
+                                    mutex = AVAILABLE.getValue();
+                                });
+                            } catch (OutOfMemoryError e) {
+                                Platform.runLater(() -> {
+                                    Alert memAlert = new Alert(Alert.AlertType.ERROR);
+                                    memAlert.setHeaderText("ERROR: Out of Memory");
+                                    memAlert.setContentText("The app has tried to allocate more VRAM than what was available." +
+                                            " Make sure your system meets minimum requirements and that the image you're" +
+                                            " trying to upscale isn't too detailed or already at an high resolution");
+                                    memAlert.showAndWait();
+                                    validLabel.setVisible(false);
+                                    pythonCalledBy = NULL.getValue();
+                                    enableAllButtons();
+                                    mutex = AVAILABLE.getValue();
+                                });
                             }
                         }
                     });
@@ -853,7 +877,7 @@ public class DiffusionController implements Pythonable {
                         while (true) {
                             try {
                                 sleep(1000);
-                                if (!pyThread.isAlive() && base64EncodedImage.get() != null) {
+                                if (!pyThread.isAlive() && base64EncodedImage.get() != null && !isOutOfMemory.get()) {
                                     Platform.runLater(() -> {
                                         validLabel.setVisible(false);
                                         byte[] decodedBytes = Base64.getDecoder().decode(base64EncodedImage.get());
@@ -881,12 +905,15 @@ public class DiffusionController implements Pythonable {
                     updateThread.start();
 
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    throwGenericAlert();
-                    validLabel.setVisible(false);
-                    pythonCalledBy = NULL.getValue();
-                    enableAllButtons();
-                    mutex = AVAILABLE.getValue();
+                    // technically the execution should never bring you here
+                    if (!isAlertShown.get()) {
+                        e.printStackTrace();
+                        throwGenericAlert();
+                        validLabel.setVisible(false);
+                        pythonCalledBy = NULL.getValue();
+                        enableAllButtons();
+                        mutex = AVAILABLE.getValue();
+                    }
                 }
 
             } else
