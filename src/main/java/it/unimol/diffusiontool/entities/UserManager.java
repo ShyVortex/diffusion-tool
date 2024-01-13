@@ -19,7 +19,7 @@ public class UserManager implements Serializable {
     }
 
     public void addUser(User user) {
-        if (this.exists(user.getUsername())) {
+        if (!this.exists(user.getUsername())) {
             this.users.put(user.getId(), user);
         }
     }
@@ -30,13 +30,13 @@ public class UserManager implements Serializable {
 
         do {
             if (!iterator.hasNext())
-                return true;
+                return false;
 
             user = iterator.next();
         }
         while (!username.equals(user.getUsername()));
 
-        return false;
+        return true;
     }
 
     public boolean existsByEmail(String email) {
