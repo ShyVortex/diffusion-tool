@@ -21,6 +21,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public class LoginController {
+    private final LoginApplication loginApp = LoginApplication.getInstance();
+    private final UserManager userManager = LoginApplication.getUserManager();
     @FXML
     private Button signInButton;
     @FXML
@@ -47,30 +49,26 @@ public class LoginController {
     private Button confirmSignInButton;
     @FXML
     private Button confirmSignUpButton;
-    private UserManager userManager = UserManager.getInstance();
 
     @FXML
     private void onSignInClick() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getLoginFXML().getLocation());
-        LoginApplication loginApplication = LoginApplication.getInstance();
         Parent rootNode = fxmlLoader.load();
-        loginApplication.setRootNode(rootNode);
-        loginApplication.restart();
+        loginApp.setRootNode(rootNode);
+        loginApp.restart();
     }
 
     @FXML
     private void onSignUpClick() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getSignupFXML().getLocation());
-        LoginApplication loginApplication = LoginApplication.getInstance();
         Parent rootNode = fxmlLoader.load();
-        loginApplication.setRootNode(rootNode);
-        loginApplication.restart();
+        loginApp.setRootNode(rootNode);
+        loginApp.restart();
     }
 
     @FXML
     private void onRememberMeClick() {
-        LoginApplication loginApplication = LoginApplication.getInstance();
-        loginApplication.setRememberSession(true);
+        loginApp.setRememberSession(true);
     }
 
     @FXML
@@ -88,7 +86,7 @@ public class LoginController {
             DiffusionApplication diffusionApp = new DiffusionApplication();
             Stage stage = (Stage) this.confirmSignInButton.getScene().getWindow();
             stage.close();
-            diffusionApp.setUser(user.get());
+            DiffusionApplication.setUser(user.get());
             diffusionApp.init();
             diffusionApp.start(new Stage());
 
@@ -142,7 +140,7 @@ public class LoginController {
             DiffusionApplication diffusionApp = new DiffusionApplication();
             Stage stage = (Stage) this.confirmSignUpButton.getScene().getWindow();
             stage.close();
-            diffusionApp.setUser(user);
+            DiffusionApplication.setUser(user);
             diffusionApp.init();
             diffusionApp.start(new Stage());
 

@@ -1,6 +1,5 @@
 package it.unimol.diffusiontool.controller;
 
-import com.google.common.collect.Iterables;
 import it.unimol.diffusiontool.application.DiffusionApplication;
 import it.unimol.diffusiontool.application.LoginApplication;
 import it.unimol.diffusiontool.application.ViewerApplication;
@@ -55,11 +54,13 @@ public class DiffusionController implements Pythonable {
     private final SimpleObjectProperty<Image> secondUpsImgProperty = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<Image> thirdUpsImgProperty = new SimpleObjectProperty<>();
     private final List<Image> upscaledImages = new ArrayList<>(3);
+    private final UserManager userManager = LoginApplication.getUserManager();
     private int activeImages;
     private int mutex;
     private int pythonCalledBy;
     private boolean includeUpscaling;
     private String formattedDate;
+    private Image lastGeneratedImage;
     @FXML
     private Label userLabel;
     @FXML
@@ -258,7 +259,8 @@ public class DiffusionController implements Pythonable {
 
     @FXML
     private void OnLogOutClick() throws Exception {
-        diffApp.setUser(null);
+        DiffusionApplication.setUser(null);
+        deleteSessionData();
         LoginApplication loginApplication = LoginApplication.getInstance();
         Stage stage = (Stage) logoutButton.getScene().getWindow();
         stage.close();
@@ -322,7 +324,7 @@ public class DiffusionController implements Pythonable {
         try {
             if (user.getUsername().equals(newUsername))
                 throw new InvalidUsernameException();
-            if (!UserManager.getInstance().exists(newUsername)) {
+            if (userManager.exists(newUsername)) {
                 if (UsernameValidator.getInstance().isValid(newUsername))
                     user.setUsername(newUsername);
                 else
@@ -374,7 +376,7 @@ public class DiffusionController implements Pythonable {
         try {
             if (user.getEmail().equals(newEmail))
                 throw new InvalidEmailException();
-            if (!UserManager.getInstance().existsByEmail(newEmail)) {
+            if (!userManager.existsByEmail(newEmail)) {
                 if (EmailValidator.getInstance().isValid(newEmail))
                     user.setEmail(newEmail);
                 else
@@ -552,9 +554,9 @@ public class DiffusionController implements Pythonable {
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
             User user = diffApp.getUser();
-            UserManager userManager = UserManager.getInstance();
             userManager.deleteByUsername(user.getUsername());
             User.free(user);
+            deleteSessionData();
             OnLogOutClick();
         }
     }
@@ -619,8 +621,8 @@ public class DiffusionController implements Pythonable {
                                         outImage = SwingFXUtils.toFXImage(ImageIO.read(bis), null);
                                         generatedImgProperty.set(outImage);
                                         genImgPreview.imageProperty().bind(generatedImgProperty);
-                                        User user = diffApp.getUser();
-                                        user.addGeneratedImage(outImage);
+                                        lastGeneratedImage = outImage;
+                                        diffApp.getUser().incGeneratedImages();
                                         imageDeleteButton.setVisible(true);
                                         imageShowButton.setVisible(true);
                                     } catch (IOException e) {
@@ -654,11 +656,9 @@ public class DiffusionController implements Pythonable {
 
     @FXML
     private void OnGenerateDeleteClick() throws IOException {
-        User user = diffApp.getUser();
-        Image image = Iterables.getLast(user.getGeneratedImages());
-        File imageFile = new File(String.valueOf(image));
-        user.getGeneratedImages().removeIf(x -> x.equals(image));
+        File imageFile = new File(String.valueOf(lastGeneratedImage));
         boolean isDeleted = imageFile.delete();
+
         try {
             if (isDeleted) {
                 processingLabel.textProperty().unbind();
@@ -683,11 +683,9 @@ public class DiffusionController implements Pythonable {
 
     @FXML
     private void OnGenerateShowClick() throws Exception {
-        Image image = Iterables.getLast(diffApp.getUser().getGeneratedImages());
-
         viewerApp.setGenerated(true);
         viewerApp.setUpscaled(includeUpscaling);
-        viewerApp.setExportedImage(image);
+        viewerApp.setExportedImage(lastGeneratedImage);
         viewerApp.init();
         viewerApp.start(new Stage());
     }
@@ -1129,7 +1127,7 @@ public class DiffusionController implements Pythonable {
 
     private String countGeneratedImgs() {
         User user = diffApp.getUser();
-        int num = user.countGeneratedImgs();
+        int num = user.getUpsImgsNum();
         String startText = "You have generated ";
         String endText;
 
@@ -1146,7 +1144,7 @@ public class DiffusionController implements Pythonable {
         String startText = "You have upscaled ";
         String endText = " images so far.";
 
-        return startText + user.getUpscImgsNum() + endText;
+        return startText + user.getUpsImgsNum() + endText;
     }
 
     private String updateProcessingLabel() {
@@ -1254,5 +1252,15 @@ public class DiffusionController implements Pythonable {
         String encodedImage = Base64.getEncoder().encodeToString(imageBytes);
 
         return encodedImage;
+    }
+
+    private void deleteSessionData() {
+        Path dataPath = Paths.get("data");
+
+        if (!Files.exists(dataPath))
+            return;
+
+        File sessionData = new File(dataPath + "/session.sr");
+        sessionData.delete();
     }
 }

@@ -1,21 +1,25 @@
 package it.unimol.diffusiontool.entities;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.UUID;
 
-public class User {
-    private String id = UUID.randomUUID().toString();
+public class User implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    private final String id = UUID.randomUUID().toString();
     private String email;
     private String username;
     private String password;
     private LocalDate birthDate;
-    private Image profilePic;
-    private Collection<Image> generatedImages;
-    private int upscImgsNum;
+    private transient Image profilePic; // transient = not serialized directly
+    private int genImgsNum;
+    private int upsImgsNum;
 
     public User(String email, String username, String password, LocalDate birthDate) {
         this.email = email;
@@ -23,8 +27,8 @@ public class User {
         this.password = password;
         this.birthDate = birthDate;
         this.profilePic = new Image("/default/new-user.png");
-        this.generatedImages = new ArrayList<>();
-        this.upscImgsNum = 0;
+        this.genImgsNum = 0;
+        this.upsImgsNum = 0;
     }
 
     public static void free(User user) {
@@ -55,12 +59,12 @@ public class User {
         return this.profilePic;
     }
 
-    public Collection<Image> getGeneratedImages() {
-        return this.generatedImages;
+    public int getGenImgsNum() {
+        return genImgsNum;
     }
 
-    public int getUpscImgsNum() {
-        return upscImgsNum;
+    public int getUpsImgsNum() {
+        return upsImgsNum;
     }
 
     public void setEmail(String email) {
@@ -83,24 +87,36 @@ public class User {
         this.profilePic = profilePic;
     }
 
-    public int countGeneratedImgs() {
-        int num = 0;
-        for (Image img : this.generatedImages)
-            num++;
+    public void incGeneratedImages() {this.genImgsNum++;}
 
-        return num;
-    }
-
-    public void addGeneratedImage(Image image) {
-        this.generatedImages.add(image);
-    }
-
-    public void incUpscaledImages() {this.upscImgsNum++;}
+    public void incUpscaledImages() {this.upsImgsNum++;}
 
     public String toString() {
         return "User {\n id='" + this.id + "',\n email='" + this.email + "',\n username='"
                 + this.username + "',\n password='" + this.password + "',\n birthDate="
                 + this.birthDate + ",\n profilePic=" + this.profilePic + ",\n generatedImages="
-                + this.generatedImages + "\n}";
+                + this.genImgsNum + "',\n upscaledImages=" + this.upsImgsNum + "\n}";
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+
+        // Convert Image to byte array and write it to the stream
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        ImageIO.write(SwingFXUtils.fromFXImage(profilePic, null), "png", byteStream);
+        byte[] imageBytes = byteStream.toByteArray();
+        out.writeObject(imageBytes);
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        // Read the byte array from the stream and convert it back to Image
+        byte[] imageBytes = (byte[]) in.readObject();
+        ByteArrayInputStream byteStream = new ByteArrayInputStream(imageBytes);
+        BufferedImage bufferedImage = ImageIO.read(byteStream);
+        profilePic = SwingFXUtils.toFXImage(bufferedImage, null);
     }
 }

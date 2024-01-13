@@ -8,9 +8,16 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class LoginApplication extends Application {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class LoginApplication extends Application implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    private static UserManager userManager;
     private Parent rootNode;
     private Stage stage;
+    private static boolean rememberSession;
     private static LoginApplication instance;
 
     public static void main(String[] args) {
@@ -18,11 +25,22 @@ public class LoginApplication extends Application {
     }
 
     public static LoginApplication getInstance() {
+        if (instance == null)
+            instance = new LoginApplication();
+
         return instance;
     }
 
     public Parent getRootNode() {
         return this.rootNode;
+    }
+
+    public static boolean getRememberSession() {
+        return rememberSession;
+    }
+
+    public static UserManager getUserManager() {
+        return userManager;
     }
 
     public Stage getStage() {
@@ -33,12 +51,16 @@ public class LoginApplication extends Application {
         this.rootNode = rootNode;
     }
 
-    public void setRememberSession(boolean rememberSession) {
+    public void setRememberSession(boolean value) {
+        rememberSession = value;
+    }
+
+    public static void setUserManager(UserManager manager) {
+        userManager = manager;
     }
 
     public void init() throws Exception {
         instance = this;
-        UserManager userManager = UserManager.getInstance();
         FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getLoginFXML().getLocation());
         this.rootNode = fxmlLoader.load();
     }
