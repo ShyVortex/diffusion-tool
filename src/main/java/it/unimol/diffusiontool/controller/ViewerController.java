@@ -30,24 +30,47 @@ public class ViewerController {
         Background background = new Background(backgroundFill);
         this.parentBox.setBackground(background);
 
-        // Force ImageView component to match app resolution
-        Platform.runLater(() -> {
-            this.borderPane.setMinSize(viewerApp.getValidWidth(), viewerApp.getValidHeight());
-            this.borderPane.setMaxSize(viewerApp.getValidWidth(), viewerApp.getValidHeight());
-            this.expImgView.setFitWidth(viewerApp.getValidWidth());
-            this.expImgView.setFitHeight(viewerApp.getValidHeight());
+        // Fixed resolutions for generated images, upscaled or not
+        int ups_generatedWH = 768;
+        int generatedWH = 512;
 
-            // Listen for stage size changes
-            viewerApp.getStage().widthProperty().addListener((obs, oldWidth, newWidth) -> {
-                this.borderPane.setMinWidth(newWidth.doubleValue());
-                this.borderPane.setMaxWidth(newWidth.doubleValue());
-                this.expImgView.setFitWidth(newWidth.doubleValue());
+        // Force UI components to match app resolution
+        if (!viewerApp.isGenerated()) {
+            Platform.runLater(() -> {
+                this.borderPane.setMinSize(viewerApp.getValidWidth(), viewerApp.getValidHeight());
+                this.borderPane.setMaxSize(viewerApp.getValidWidth(), viewerApp.getValidHeight());
+                this.expImgView.setFitWidth(viewerApp.getValidWidth());
+                this.expImgView.setFitHeight(viewerApp.getValidHeight());
+
+                // Listen for stage size changes
+                viewerApp.getStage().widthProperty().addListener((obs, oldWidth, newWidth) -> {
+                    this.borderPane.setMinWidth(newWidth.doubleValue());
+                    this.borderPane.setMaxWidth(newWidth.doubleValue());
+                    this.expImgView.setFitWidth(newWidth.doubleValue());
+                });
+                viewerApp.getStage().heightProperty().addListener((obs, oldHeight, newHeight) -> {
+                    this.borderPane.setMinHeight(newHeight.doubleValue());
+                    this.borderPane.setMaxHeight(newHeight.doubleValue());
+                    this.expImgView.setFitHeight(newHeight.doubleValue());
+                });
             });
-            viewerApp.getStage().heightProperty().addListener((obs, oldHeight, newHeight) -> {
-                this.borderPane.setMinHeight(newHeight.doubleValue());
-                this.borderPane.setMaxHeight(newHeight.doubleValue());
-                this.expImgView.setFitHeight(newHeight.doubleValue());
-            });
-        });
+
+        } else {
+            if (viewerApp.isUpscaled()) {
+                Platform.runLater(() -> {
+                    this.borderPane.setMinSize(ups_generatedWH, ups_generatedWH);
+                    this.borderPane.setMaxSize(ups_generatedWH, ups_generatedWH);
+                    this.expImgView.setFitWidth(ups_generatedWH);
+                    this.expImgView.setFitHeight(ups_generatedWH);
+                });
+            } else {
+                Platform.runLater(() -> {
+                    this.borderPane.setMinSize(generatedWH, generatedWH);
+                    this.borderPane.setMaxSize(generatedWH, generatedWH);
+                    this.expImgView.setFitWidth(generatedWH);
+                    this.expImgView.setFitHeight(generatedWH);
+                });
+            }
+        }
     }
 }

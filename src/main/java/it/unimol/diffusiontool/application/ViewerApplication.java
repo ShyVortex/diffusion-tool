@@ -41,6 +41,14 @@ public class ViewerApplication extends Application {
         return validHeight;
     }
 
+    public boolean isGenerated() {
+        return isGenerated;
+    }
+
+    public boolean isUpscaled() {
+        return isUpscaled;
+    }
+
     public Image getExportedImage() {
         return exportedImg;
     }
