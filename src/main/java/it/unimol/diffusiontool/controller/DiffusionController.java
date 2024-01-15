@@ -43,7 +43,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static it.unimol.diffusiontool.properties.GeneralProperties.*;
-import static java.lang.Thread.sleep;
 
 public class DiffusionController implements Pythonable {
     private final DiffusionApplication diffApp = DiffusionApplication.getToolInstance();
@@ -591,6 +590,21 @@ public class DiffusionController implements Pythonable {
 
     @FXML
     private void OnCreateClick() {
+        StoppableThread deleteThread = new StoppableThread(() -> {
+            if (processingLabel.getText().equals("Preview") && genImgPreview.isVisible()) {
+                Platform.runLater(() -> {
+                    processingLabel.textProperty().unbind();
+                    processingLabel.setText("Processing...");
+                    processingLabel.setVisible(false);
+                    genImgPreview.imageProperty().unbind();
+                    genImgPreview.setVisible(false);
+                    imageDeleteButton.setVisible(false);
+                    imageShowButton.setVisible(false);
+                });
+            }
+        });
+        deleteThread.start();
+
         String prompt = promptArea.getText();
         String tags = tagsField.getText();
 
@@ -602,7 +616,14 @@ public class DiffusionController implements Pythonable {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
             formattedDate = currentDate.format(formatter);
 
-            StoppableThread processingThread = new StoppableThread(() -> processingLabel.setVisible(true));
+            StoppableThread processingThread = new StoppableThread(() -> {
+                try {
+                    deleteThread.join();
+                    Platform.runLater(() -> processingLabel.setVisible(true));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
             processingThread.start();
 
             try {
@@ -611,6 +632,7 @@ public class DiffusionController implements Pythonable {
                 AtomicReference<String> base64EncodedImage = new AtomicReference<>();
                 StoppableThread pyThread = new StoppableThread(() -> {
                     try {
+                        processingThread.join();
                         base64EncodedImage.set(callPythonScript(prompt, tags, formattedDate));
                         StoppableThread.currentThread().stop(StoppableThread.currentThread());
                     } catch (IOException | GenerationException e) {
@@ -618,6 +640,8 @@ public class DiffusionController implements Pythonable {
                         throwGenericAlert();
                         pythonCalledBy = NULL.getValue();
                         processingLabel.setVisible(false);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 });
                 pyThread.start();
@@ -625,8 +649,9 @@ public class DiffusionController implements Pythonable {
                 StoppableThread updateThread = new StoppableThread(() -> {
                     while (true) {
                         try {
-                            sleep(1000);
-                            if (!pyThread.isAlive() && base64EncodedImage.get() != null) {
+                            pyThread.join();
+                            if (base64EncodedImage.get() != null) {
+                                // join method above assumes pyThread is terminated already
                                 Platform.runLater(() -> {
                                     processingLabel.textProperty().bind(Bindings.createStringBinding(
                                             DiffusionController.this::updateProcessingLabel));
@@ -637,6 +662,7 @@ public class DiffusionController implements Pythonable {
                                         outImage = SwingFXUtils.toFXImage(ImageIO.read(bis), null);
                                         generatedImgProperty.set(outImage);
                                         genImgPreview.imageProperty().bind(generatedImgProperty);
+                                        genImgPreview.setVisible(true);
                                         lastGeneratedImage = outImage;
                                         diffApp.getUser().incGeneratedImages();
                                         imageDeleteButton.setVisible(true);
@@ -849,40 +875,48 @@ public class DiffusionController implements Pythonable {
                     pythonCalledBy = UPSCALE.getValue();
                     AtomicReference<String> base64EncodedImage = new AtomicReference<>();
                     StoppableThread pyThread = new StoppableThread(() -> {
-                        while (!isOutOfMemory.get() && !isAlertShown.get()) {
-                            try {
-                                if (!processingThread.isAlive()) {
-                                    base64EncodedImage.set(callPythonScript(imgPath));
-                                    if (base64EncodedImage.get().equals("OUT OF MEMORY")) {
-                                        isOutOfMemory.set(true);
-                                        throw new OutOfMemoryError();
+                        try {
+                            processingThread.join();
+                            while (!isOutOfMemory.get() && !isAlertShown.get()) {
+                                try {
+                                    if (!processingThread.isAlive()) {
+                                        base64EncodedImage.set(callPythonScript(imgPath));
+                                        if (base64EncodedImage.get().equals("OUT OF MEMORY")) {
+                                            isOutOfMemory.set(true);
+                                            throw new OutOfMemoryError();
+                                        }
+                                        StoppableThread.currentThread().stop(StoppableThread.currentThread());
+                                        break;
                                     }
-                                    StoppableThread.currentThread().stop(StoppableThread.currentThread());
-                                    break;
+                                } catch (IOException | UpscalingException e) {
+                                    isAlertShown.set(true);
+                                    Platform.runLater(() -> {
+                                        throwGenericAlert();
+                                        validLabel.setVisible(false);
+                                        pythonCalledBy = NULL.getValue();
+                                        enableAllButtons();
+                                        mutex = AVAILABLE.getValue();
+                                    });
+                                } catch (OutOfMemoryError e) {
+                                    Platform.runLater(() -> {
+                                        Alert memAlert = new Alert(Alert.AlertType.ERROR);
+                                        memAlert.setHeaderText("ERROR: Out of Memory");
+                                        memAlert.setContentText(
+                                                "The app has tried to allocate more VRAM than what was available." +
+                                                " Make sure your system meets minimum requirements and that the image" +
+                                                " you're trying to upscale isn't too detailed or already at an high" +
+                                                " resolution"
+                                        );
+                                        memAlert.showAndWait();
+                                        validLabel.setVisible(false);
+                                        pythonCalledBy = NULL.getValue();
+                                        enableAllButtons();
+                                        mutex = AVAILABLE.getValue();
+                                    });
                                 }
-                            } catch (IOException | UpscalingException e) {
-                                isAlertShown.set(true);
-                                Platform.runLater(() -> {
-                                    throwGenericAlert();
-                                    validLabel.setVisible(false);
-                                    pythonCalledBy = NULL.getValue();
-                                    enableAllButtons();
-                                    mutex = AVAILABLE.getValue();
-                                });
-                            } catch (OutOfMemoryError e) {
-                                Platform.runLater(() -> {
-                                    Alert memAlert = new Alert(Alert.AlertType.ERROR);
-                                    memAlert.setHeaderText("ERROR: Out of Memory");
-                                    memAlert.setContentText("The app has tried to allocate more VRAM than what was available." +
-                                            " Make sure your system meets minimum requirements and that the image you're" +
-                                            " trying to upscale isn't too detailed or already at an high resolution");
-                                    memAlert.showAndWait();
-                                    validLabel.setVisible(false);
-                                    pythonCalledBy = NULL.getValue();
-                                    enableAllButtons();
-                                    mutex = AVAILABLE.getValue();
-                                });
                             }
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
                         }
                     });
                     pyThread.start();
@@ -890,8 +924,8 @@ public class DiffusionController implements Pythonable {
                     StoppableThread updateThread = new StoppableThread(() -> {
                         while (true) {
                             try {
-                                sleep(1000);
-                                if (!pyThread.isAlive() && base64EncodedImage.get() != null && !isOutOfMemory.get()) {
+                                pyThread.join();
+                                if (base64EncodedImage.get() != null && !isOutOfMemory.get()) {
                                     Platform.runLater(() -> {
                                         validLabel.setVisible(false);
                                         byte[] decodedBytes = Base64.getDecoder().decode(base64EncodedImage.get());
@@ -919,7 +953,6 @@ public class DiffusionController implements Pythonable {
                     updateThread.start();
 
                 } catch (Exception e) {
-                    // technically the execution should never bring you here
                     if (!isAlertShown.get()) {
                         e.printStackTrace();
                         throwGenericAlert();
@@ -994,13 +1027,24 @@ public class DiffusionController implements Pythonable {
             relativeImg = upscaledImages.get(0);
         else if (clickedButton.equals(secondShowButton))
             relativeImg = upscaledImages.get(1);
-        else if (clickedButton.equals(thirdStartButton))
+        else if (clickedButton.equals(thirdShowButton))
             relativeImg = upscaledImages.get(2);
 
-        viewerApp.setGenerated(false);
-        viewerApp.setExportedImage(relativeImg);
-        viewerApp.init();
-        viewerApp.start(new Stage());
+        try {
+            if (relativeImg == null)
+                throw new NullPointerException();
+
+            viewerApp.setGenerated(false);
+            viewerApp.setExportedImage(relativeImg);
+            viewerApp.init();
+            viewerApp.start(new Stage());
+
+        } catch (NullPointerException e) {
+            Alert npAlert = new Alert(Alert.AlertType.ERROR);
+            npAlert.setHeaderText("ERROR: Image is Null");
+            npAlert.setContentText("Due to an inexplicable error, no image has been found on this layer.");
+            npAlert.showAndWait();
+        }
     }
 
     @Override

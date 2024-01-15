@@ -38,6 +38,13 @@
       <element id="directory" name="venv">
         <element id="dir-copy" path="$PROJECT_DIR$/venv" />
       </element>
+      <element id="directory" name="models">
+        <element id="dir-copy" path="$PROJECT_DIR$/models" />
+      </element>
+      <element id="directory" name="result">
+        <element id="directory" name="generated" />
+        <element id="directory" name="upscaled" />
+      </element>
     </root>
   </artifact>
 </component>

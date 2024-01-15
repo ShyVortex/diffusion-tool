@@ -18,7 +18,7 @@ def main():
     date = sys.argv[3]
 
     # Load general model
-    repo_id = "stabilityai/stable-diffusion-2-1-base"
+    repo_id = "stabilityai/stable-diffusion-2-1-base"  # you can use 2-1 if you have more VRAM
     pipe = DiffusionPipeline.from_pretrained(repo_id, torch_dtype=torch.float16, variant="fp16")
     pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
     pipe = pipe.to("cuda")
