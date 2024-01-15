@@ -1,5 +1,6 @@
 package it.unimol.diffusiontool.application;
 
+import it.unimol.diffusiontool.controller.DiffusionController;
 import it.unimol.diffusiontool.entities.User;
 import it.unimol.diffusiontool.entities.UserManager;
 import it.unimol.diffusiontool.properties.FXMLProperties;
@@ -64,13 +65,17 @@ public class DiffusionApplication extends Application {
         user = given;
     }
 
-    public void init() throws Exception {
+    public void init() {
         toolInstance = this;
-        currentFXML = new FXMLLoader(FXMLProperties.getInstance().getHomeFXML().getLocation());
-        this.rootNode = currentFXML.load();
     }
 
-    public void start(Stage stage) {
+    public void start(Stage stage) throws IOException {
+        currentFXML = new FXMLLoader(FXMLProperties.getInstance().getHomeFXML().getLocation());
+        this.rootNode = currentFXML.load();
+
+        DiffusionController diffController = currentFXML.getController();
+        diffController.setStage(this.stage);
+
         stage.setScene(new Scene(this.rootNode));
         stage.setResizable(false);
         stage.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, this::closeWindowEvent);

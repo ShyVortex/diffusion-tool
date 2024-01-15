@@ -94,6 +94,7 @@ public class ViewerApplication extends Application {
     public void start(Stage stage) {
         Scene scene = new Scene(this.rootNode);
         stage.setScene(scene);
+        stage.setTitle("Image Viewer");
 
         if (!isGenerated) {
             // Get monitor resolution

@@ -9,6 +9,7 @@ import it.unimol.diffusiontool.properties.FXMLProperties;
 import it.unimol.diffusiontool.validators.BirthdateValidator;
 import it.unimol.diffusiontool.validators.EmailValidator;
 import it.unimol.diffusiontool.validators.UsernameValidator;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -51,17 +52,31 @@ public class LoginController {
     private Button confirmSignUpButton;
 
     @FXML
+    private void initialize() {
+        if (loginApp.getCurrentFXML().equals(FXMLProperties.getInstance().getLoginFXML()))
+            Platform.runLater(() -> {
+                Stage stage = (Stage) signInButton.getScene().getWindow();
+                stage.setTitle("Login");
+            });
+        else
+            Platform.runLater(() -> {
+                Stage stage = (Stage) signUpButton.getScene().getWindow();
+                stage.setTitle("Sign Up");
+            });
+    }
+
+    @FXML
     private void onSignInClick() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getLoginFXML().getLocation());
-        Parent rootNode = fxmlLoader.load();
+        loginApp.setCurrentFXML(new FXMLLoader(FXMLProperties.getInstance().getLoginFXML().getLocation()));
+        Parent rootNode = loginApp.getCurrentFXML().load();
         loginApp.setRootNode(rootNode);
         loginApp.restart();
     }
 
     @FXML
     private void onSignUpClick() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getSignupFXML().getLocation());
-        Parent rootNode = fxmlLoader.load();
+        loginApp.setCurrentFXML(new FXMLLoader(FXMLProperties.getInstance().getSignupFXML().getLocation()));
+        Parent rootNode = loginApp.getCurrentFXML().load();
         loginApp.setRootNode(rootNode);
         loginApp.restart();
     }
@@ -172,5 +187,10 @@ public class LoginController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SuppressWarnings("never used")
+    public void setStage(Stage stage) {
+        // no action needed, stage is passed from LoginApplication
     }
 }

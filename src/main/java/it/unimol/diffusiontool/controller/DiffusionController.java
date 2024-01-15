@@ -217,6 +217,10 @@ public class DiffusionController implements Pythonable {
 
     @FXML
     private void initHomeView() {
+        Platform.runLater(() -> {
+            Stage stage = (Stage) homeButton.getScene().getWindow();
+            stage.setTitle("Home");
+        });
         profileButton.setBackground(null);
         genImgsLabel.textProperty().bind(Bindings.createStringBinding(this::countGeneratedImgs));
         upscImgsLabel.textProperty().bind(Bindings.createStringBinding(this::countUpscaledImgs));
@@ -226,6 +230,10 @@ public class DiffusionController implements Pythonable {
 
     @FXML
     private void initProfileView() {
+        Platform.runLater(() -> {
+            Stage stage = (Stage) profileUserImage.getScene().getWindow();
+            stage.setTitle("Your Profile");
+        });
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         profileUserImage.imageProperty().bind(profilePicProperty);
         usernameField.textProperty().bind(Bindings.createStringBinding(this::getLoggedInUser));
@@ -236,6 +244,10 @@ public class DiffusionController implements Pythonable {
 
     @FXML
     private void initGenerateView() {
+        Platform.runLater(() -> {
+            Stage stage = (Stage) generateButton.getScene().getWindow();
+            stage.setTitle("Image Generator");
+        });
         profileButton.setBackground(null);
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         homeUserImage.imageProperty().bind(profilePicProperty);
@@ -243,6 +255,10 @@ public class DiffusionController implements Pythonable {
 
     @FXML
     private void initUpscaleView() {
+        Platform.runLater(() -> {
+            Stage stage = (Stage) upscaleButton.getScene().getWindow();
+            stage.setTitle("Image Upscaler");
+        });
         activeImages = 0;
         mutex = AVAILABLE.getValue();
 
@@ -1125,9 +1141,14 @@ public class DiffusionController implements Pythonable {
         return ERROR.getCode();
     }
 
+    @SuppressWarnings("never used")
+    public void setStage(Stage stage) {
+        // no action needed, stage is passed from DiffusionApplication
+    }
+
     private String countGeneratedImgs() {
         User user = diffApp.getUser();
-        int num = user.getUpsImgsNum();
+        int num = user.getGenImgsNum();
         String startText = "You have generated ";
         String endText;
 

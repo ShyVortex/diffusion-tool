@@ -1,5 +1,6 @@
 package it.unimol.diffusiontool.application;
 
+import it.unimol.diffusiontool.controller.LoginController;
 import it.unimol.diffusiontool.entities.UserManager;
 import it.unimol.diffusiontool.properties.FXMLProperties;
 import javafx.application.Application;
@@ -8,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -17,6 +19,7 @@ public class LoginApplication extends Application implements Serializable {
     private static UserManager userManager;
     private Parent rootNode;
     private Stage stage;
+    private FXMLLoader currentFXML;
     private static boolean rememberSession;
     private static LoginApplication instance;
 
@@ -47,6 +50,10 @@ public class LoginApplication extends Application implements Serializable {
         return this.stage;
     }
 
+    public FXMLLoader getCurrentFXML() {
+        return currentFXML;
+    }
+
     public void setRootNode(Parent rootNode) {
         this.rootNode = rootNode;
     }
@@ -59,13 +66,21 @@ public class LoginApplication extends Application implements Serializable {
         userManager = manager;
     }
 
-    public void init() throws Exception {
-        instance = this;
-        FXMLLoader fxmlLoader = new FXMLLoader(FXMLProperties.getInstance().getLoginFXML().getLocation());
-        this.rootNode = fxmlLoader.load();
+    public void setCurrentFXML(FXMLLoader currentFXML) {
+        this.currentFXML = currentFXML;
     }
 
-    public void start(Stage stage) {
+    public void init() {
+        instance = this;
+    }
+
+    public void start(Stage stage) throws IOException {
+        currentFXML = new FXMLLoader(FXMLProperties.getInstance().getLoginFXML().getLocation());
+        this.rootNode = currentFXML.load();
+
+        LoginController loginController = currentFXML.getController();
+        loginController.setStage(this.stage);
+
         stage.setScene(new Scene(this.rootNode));
         stage.setResizable(false);
         stage.show();
