@@ -37,7 +37,9 @@ BSRGAN is a practical degradation model for Deep Blind Image Super-Resolution, d
 [Luc Van Gool](https://vision.ee.ethz.ch/people-details.OTAyMzM=.TGlzdC8zMjQ4LC0xOTcxNDY1MTc4.html), [Radu Timofte](http://people.ee.ethz.ch/~timofter/),
 [Computer Vision Lab](https://vision.ee.ethz.ch/the-institute.html), in ETH Zurich, Switzerland.  
 You can check out their repository and find out more here: [BSRGAN](https://github.com/cszn/BSRGAN).    
-The project utilizes Stable Diffusion's generative AI pipelines for image generation and upscaling. In particular, it uses:  
+In order to set up the model, a script made by [TGS963](https://github.com/TGS963) in the public repository of [upscayl](https://github.com/upscayl/upscayl) was particularly helpful.  
+I've edited said script to adapt it and make it work on my project, keeping acknowledgments in comments just below library imports.  
+The project utilizes Stable Diffusion's generative AI pipelines for image generation and upscaling, in particular:  
 + [stable-diffusion-2-1](https://huggingface.co/stabilityai/stable-diffusion-2-1)
 + [stable-diffusion-2-1-base](https://huggingface.co/stabilityai/stable-diffusion-2-1-base)
 + [sd-x2-latent-upscaler](https://huggingface.co/stabilityai/sd-x2-latent-upscaler)
