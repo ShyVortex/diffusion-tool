@@ -1051,26 +1051,10 @@ public class DiffusionController implements Pythonable {
     public String callPythonScript(String prompt, String tags, String date, String path) throws IOException,
             GenerationException, UpscalingException
     {
-        String activateScriptPath = "venv/bin/python";
-        String pythonScriptPath;
+        String activateScriptPath = "/home/angelo/venv/bin/python";
+        String pythonScriptPath = findPythonScript();
         StringBuilder output = new StringBuilder();
         StringBuilder execOutput = new StringBuilder();
-
-        switch (pythonCalledBy) {
-            case 1:
-                if (!includeUpscaling)
-                    pythonScriptPath = "src/main/python/it/unimol/diffusiontool/generate.py";
-                else
-                    pythonScriptPath = "src/main/python/it/unimol/diffusiontool/generate_upscale.py";
-                break;
-
-            case 2:
-                pythonScriptPath = "src/main/python/it/unimol/diffusiontool/upscale.py";
-                break;
-
-            default:
-                return ERROR.getCode();
-        }
 
         // Construct the command to execute
         List<String> generateCommand;
@@ -1185,7 +1169,44 @@ public class DiffusionController implements Pythonable {
         return ERROR.getCode();
     }
 
-    @SuppressWarnings("never used")
+    @Override
+    public String findPythonScript() {
+        Path buildPath;
+        Path targetPath;
+        String pathStr;
+
+        switch (pythonCalledBy) {
+            case 1:
+                if (!includeUpscaling) {
+                    buildPath = Path.of("src/main/python/it/unimol/diffusiontool/generate.py");
+                    targetPath = Path.of("it/unimol/diffusiontool/generate.py");
+                }
+                else {
+                    buildPath = Path.of("src/main/python/it/unimol/diffusiontool/generate_upscale.py");
+                    targetPath = Path.of("it/unimol/diffusiontool/generate_upscale.py");
+                }
+                break;
+
+            case 2:
+                buildPath = Path.of("src/main/python/it/unimol/diffusiontool/upscale.py");
+                targetPath = Path.of("it/unimol/diffusiontool/upscale.py");
+                break;
+
+            default:
+                return ERROR.getCode();
+        }
+
+        if (Files.exists(buildPath))
+            pathStr = buildPath.toString();
+        else {
+            assert Files.exists(targetPath);
+            pathStr = targetPath.toString();
+        }
+
+        return pathStr;
+    }
+
+    @SuppressWarnings("automatic")
     public void setStage(Stage stage) {
         // no action needed, stage is passed from DiffusionApplication
     }

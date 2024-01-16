@@ -10,4 +10,5 @@ public interface Pythonable {
             GenerationException, UpscalingException;
     String callPythonScript(String prompt, String tags, String date) throws IOException, GenerationException;
     String callPythonScript(String img) throws IOException, UpscalingException;
+    String findPythonScript();
 }

@@ -206,7 +206,7 @@ public class LoginController {
         }
     }
 
-    @SuppressWarnings("never used")
+    @SuppressWarnings("automatic")
     public void setStage(Stage stage) {
         // no action needed, stage is passed from LoginApplication
     }
