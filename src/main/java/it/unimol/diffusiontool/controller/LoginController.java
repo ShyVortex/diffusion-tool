@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 public class LoginController {
@@ -137,15 +138,25 @@ public class LoginController {
                 throw new BlankFieldException();
             if (!emailValidator.isValid(email))
                 throw new InvalidEmailException();
+            if (userManager.existsByEmail(email))
+                throw new DuplicatedUserException();
             if (!usernameValidator.isValid(username))
                 throw new InvalidUsernameException();
             if (birthDate == null) {
                 birthDate = LocalDate.parse(editorText);
-                if (!birthdateValidator.isValid(birthDate))
+                if (!birthdateValidator.isValid(birthDate)) {
+                    if (ChronoUnit.DAYS.between(birthDate, LocalDate.now()) <= 3650L)
+                        throw new AgeTooLowException();
+                    else
+                        throw new InvalidDateException();
+                }
+            }
+            if (!birthdateValidator.isValid(birthDate)) {
+                if (ChronoUnit.DAYS.between(birthDate, LocalDate.now()) <= 3650L)
+                    throw new AgeTooLowException();
+                else
                     throw new InvalidDateException();
             }
-            if (!birthdateValidator.isValid(birthDate))
-                throw new InvalidDateException();
             if (duplicated.isPresent())
                 throw new DuplicatedUserException();
 
@@ -182,8 +193,14 @@ public class LoginController {
         } catch (DuplicatedUserException e) {
             Alert dupUserAlert = new Alert(AlertType.ERROR);
             dupUserAlert.setHeaderText("ERROR: Duplicated User");
-            dupUserAlert.setContentText("An user with such username already exists.");
+            dupUserAlert.setContentText("An user with such username or email already exists.");
             dupUserAlert.showAndWait();
+        } catch (AgeTooLowException e) {
+            Alert atlAlert = new Alert(AlertType.ERROR);
+            atlAlert.setHeaderText("ERROR: Age requirements not satisfied");
+            atlAlert.setContentText("You must be at least 10 years old to use the application. Exiting...");
+            atlAlert.showAndWait();
+            System.exit(0);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
