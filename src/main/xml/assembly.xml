@@ -1,0 +1,44 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
+
+    <id>py</id>
+
+    <formats>
+        <format>jar</format>
+    </formats>
+
+    <fileSets>
+        <!-- Include compiled classes -->
+        <fileSet>
+            <directory>${project.build.directory}/classes</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+
+        <!-- Include resources -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+
+        <!-- Include additional directories -->
+        <fileSet>
+            <directory>${basedir}/models</directory>
+            <outputDirectory>models</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/result</directory>
+            <outputDirectory>result</outputDirectory>
+            <includes>
+                <include>generated/**</include>
+                <include>upscaled/**</include>
+            </includes>
+        </fileSet>
+
+        <!-- Include the venv directory -->
+        <fileSet>
+            <directory>${basedir}/venv</directory>
+            <outputDirectory>venv</outputDirectory>
+        </fileSet>
+    </fileSets>
+</assembly>

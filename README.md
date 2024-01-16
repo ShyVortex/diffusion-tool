@@ -15,9 +15,10 @@ In order to compile and run the software, it is required that you have the follo
 - Open Java Development Kit (OpenJDK) 17 or above
 - Apache Maven (at least version 3.6.3 is recommended)
  
-You also MUST install a Python virtual environment in the working directory, inside a folder named 'venv', with the following packages:
+You also MUST install a Python virtual environment in the working directory, inside a folder named 'venv', 
+with the packages listed in *requirements*.
  ```shell
- pip install diffusers pillow torch torchvision base64 opencv-python numpy transformers accelerate 
+ pip install -r requirements.txt
  ```
 
 # System requirements

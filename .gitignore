@@ -5,6 +5,8 @@ data/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+dependency-reduced-pom.xml
+venv.zip
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

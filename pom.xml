@@ -6,10 +6,12 @@
 
     <groupId>it.unimol</groupId>
     <artifactId>diffusion-tool</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.9b</version>
     <name>diffusion-tool</name>
 
     <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.9.2</junit.version>
     </properties>
@@ -114,21 +116,32 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
-                        <!-- Default configuration for running with: mvn clean javafx:run -->
-                        <id>default-cli</id>
+                        <id>create-archive</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
                         <configuration>
-                            <mainClass>it.unimol.diffusiontool/it.unimol.diffusiontool.HelloApplication</mainClass>
-                            <launcher>app</launcher>
-                            <jlinkZipName>app</jlinkZipName>
-                            <jlinkImageName>app</jlinkImageName>
-                            <noManPages>true</noManPages>
-                            <stripDebug>true</stripDebug>
-                            <noHeaderFiles>true</noHeaderFiles>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <addClasspath>true</addClasspath>
+                                    <mainClass>it.unimol.diffusiontool.Main</mainClass>
+                                </manifest>
+                            </archive>
+                            <appendAssemblyId>true</appendAssemblyId>
+                            <finalName>${project.artifactId}-${project.version}</finalName>
+                            <attach>true</attach>
+                            <descriptors>
+                                <descriptor>src/main/xml/assembly.xml</descriptor>
+                            </descriptors>
                         </configuration>
                     </execution>
                 </executions>
