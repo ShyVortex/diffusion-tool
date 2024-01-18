@@ -42,6 +42,11 @@ def main():
     output_folder = os.path.abspath("result/upscaled")
     output_filename = f"upscaled_image_{date}.png"
     output_filepath = os.path.join(output_folder, output_filename)
+
+    # Check if the output folder exists, and create it if not, then save the image
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    image.save(output_filepath)
     upscaled_image.save(output_filepath)
     torch.cuda.empty_cache()
 

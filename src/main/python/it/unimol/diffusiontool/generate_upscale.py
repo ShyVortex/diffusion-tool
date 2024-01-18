@@ -39,7 +39,7 @@ def main():
             output_type="latent"
         ).images
 
-    # Process upscaling and save the generated image
+    # Process upscaling and set the output path
     upscaled_image = upscaler(
         prompt=prompt,
         image=low_res_latents,
@@ -50,6 +50,10 @@ def main():
     output_folder = os.path.abspath("result/generated")
     output_filename = f"generated_image_{date}.png"
     output_filepath = os.path.join(output_folder, output_filename)
+
+    # Check if the output folder exists, and create it if not, then save the image
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     upscaled_image.save(output_filepath)
     torch.cuda.empty_cache()
 

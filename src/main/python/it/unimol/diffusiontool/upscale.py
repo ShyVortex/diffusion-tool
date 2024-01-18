@@ -35,6 +35,10 @@ def main():
     result_filename = f"upscaled_image_{date}.png"
     result_path = os.path.join(result_folder, result_filename)
 
+    # Check if the output folder exists, and create it if not
+    if not os.path.exists(result_folder):
+        os.makedirs(result_folder)
+
     # Convert and upscale image
     img_adapted = adapt_image_for_deeplearning(img, device)
     try:
@@ -49,6 +53,13 @@ def main():
     with open(result_path, "rb") as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
     print(encoded_image)
+
+
+def find_file(start_dir, filename):
+    for root, dirs, files in os.walk(start_dir):
+        if filename in files:
+            return os.path.join(root, filename)
+    return None
 
 
 def make_layer(block, n_layers):
@@ -84,7 +95,7 @@ class ResidualDenseBlock_5C(nn.Module):
 
 
 class RRDB(nn.Module):
-    '''Residual in Residual Dense Block'''
+    """Residual in Residual Dense Block"""
 
     def __init__(self, nf, gc=32):
         super(RRDB, self).__init__()
@@ -208,7 +219,10 @@ def prepare_AI_model(device):
     elif 'cuda' in device:
         backend = torch.device('cuda')
 
-    model_path = os.path.abspath("models/BSRGAN.pth")
+    start_dir = os.getcwd()
+    upscaling_model = "BSRGAN.pth"
+
+    model_path = os.path.abspath(find_file(start_dir, upscaling_model))
 
     model = RRDBNet(in_nc=3, out_nc=3, nf=64, nb=23, gc=32, sf=4)
     model.load_state_dict(torch.load(model_path), strict=True)

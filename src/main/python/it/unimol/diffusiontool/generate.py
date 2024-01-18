@@ -24,12 +24,16 @@ def main():
     pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
     pipe = pipe.to("cuda")
 
-    # Process the prompt and save the image
+    # Process the prompt and set the output path
     with torch.cuda.amp.autocast():
         image = pipe(prompt=prompt, negative_prompt=tags, num_inference_steps=25).images[0]
     output_folder = os.path.abspath("result/generated")
     output_filename = f"generated_image_{date}.png"
     output_filepath = os.path.join(output_folder, output_filename)
+
+    # Check if the output folder exists, and create it if not, then save the image
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     image.save(output_filepath)
 
     # Encode the image as a base64 string

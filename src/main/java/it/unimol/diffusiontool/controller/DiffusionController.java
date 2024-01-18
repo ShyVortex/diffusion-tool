@@ -35,10 +35,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -891,6 +888,7 @@ public class DiffusionController implements Pythonable {
                                 } catch (IOException | UpscalingException e) {
                                     isAlertShown.set(true);
                                     Platform.runLater(() -> {
+                                        e.printStackTrace();
                                         throwGenericAlert();
                                         validLabel.setVisible(false);
                                         pythonCalledBy = NULL.getValue();
@@ -1051,8 +1049,13 @@ public class DiffusionController implements Pythonable {
     public String callPythonScript(String prompt, String tags, String date, String path) throws IOException,
             GenerationException, UpscalingException
     {
-        String activateScriptPath = "/home/angelo/venv/bin/python";
-        String pythonScriptPath = findPythonScript();
+        // Get all necessary paths
+        File pythonVenv = findPythonVenv();
+        String activateScriptPath = pythonVenv.getPath();
+        File pythonScript = findPythonScript();
+        String pythonScriptPath = pythonScript.getPath();
+
+        // Initialize logs
         StringBuilder output = new StringBuilder();
         StringBuilder execOutput = new StringBuilder();
 
@@ -1170,40 +1173,51 @@ public class DiffusionController implements Pythonable {
     }
 
     @Override
-    public String findPythonScript() {
-        Path buildPath;
-        Path targetPath;
-        String pathStr;
+    public File findPythonVenv() {
+        // Get user's home directory and virtual environment folder
+        String userHome = System.getProperty("user.home");
+        File directory = new File(userHome, "venv");
 
+        return searchFile(directory, "python");
+    }
+
+    @Override
+    public File findPythonScript() {
+        // Get the working directory
+        String workingDirectory = System.getProperty("user.dir");
+        File directory = new File(workingDirectory);
+
+        String fileName;
         switch (pythonCalledBy) {
             case 1:
-                if (!includeUpscaling) {
-                    buildPath = Path.of("src/main/python/it/unimol/diffusiontool/generate.py");
-                    targetPath = Path.of("it/unimol/diffusiontool/generate.py");
-                }
-                else {
-                    buildPath = Path.of("src/main/python/it/unimol/diffusiontool/generate_upscale.py");
-                    targetPath = Path.of("it/unimol/diffusiontool/generate_upscale.py");
-                }
+                // if (includeUpscaling) -> generate_upscale.py, else -> generate.py
+                fileName = includeUpscaling ? "generate_upscale.py" : "generate.py";
                 break;
-
             case 2:
-                buildPath = Path.of("src/main/python/it/unimol/diffusiontool/upscale.py");
-                targetPath = Path.of("it/unimol/diffusiontool/upscale.py");
+                fileName = "upscale.py";
                 break;
-
             default:
-                return ERROR.getCode();
+                throw new IllegalArgumentException("Invalid pythonCalledBy value: " + pythonCalledBy);
         }
 
-        if (Files.exists(buildPath))
-            pathStr = buildPath.toString();
-        else {
-            assert Files.exists(targetPath);
-            pathStr = targetPath.toString();
+        return searchFile(directory, fileName);
+    }
+
+    private File searchFile(File directory, String fileName) {
+        File[] files = directory.listFiles(); // similar to 'tree' in shell, it scans for all files
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    // Recursively search in subdirectories
+                    File foundScript = searchFile(file, fileName);
+                    if (foundScript != null)
+                        return foundScript;
+                } else if (Objects.equals(file.getName(), fileName))
+                    return file;
+            }
         }
 
-        return pathStr;
+        return null;
     }
 
     @SuppressWarnings("automatic")

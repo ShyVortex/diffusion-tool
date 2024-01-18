@@ -146,7 +146,6 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <!-- ... -->
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -154,6 +153,9 @@
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>data/**/*.sr</exclude>
+                                        <exclude>result/generated/**/*.png</exclude>
+                                        <exclude>result/upscaled/**/*.png</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -161,14 +163,13 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>it.unimol.diffusiontool.Main</mainClass>
                                 </transformer>
-                                <!-- Add a new transformer for resources -->
+                                <!-- Default transformer for JavaFX resources -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
                                     <resource>META-INF/services/javafx.fxml.FXMLLoader</resource>
                                     <resource>META-INF/services/javafx.fxml.FXMLLoaderFactory</resource>
                                     <resource>META-INF/services/javafx.fxml.JavaFXBuilderFactory</resource>
                                 </transformer>
                             </transformers>
-                            <!-- ... -->
                         </configuration>
                     </execution>
                 </executions>
@@ -180,10 +181,23 @@
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>false</filtering>
                 <includes>
-                    <!-- Add inclusions as needed -->
                     <include>**/*.fxml</include>
                     <include>**/*.png</include>
                     <include>**/*.jpg</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/models</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.pth</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/python/it/unimol/diffusiontool</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.py</include>
                 </includes>
             </resource>
         </resources>

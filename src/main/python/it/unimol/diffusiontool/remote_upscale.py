@@ -28,6 +28,9 @@ def main():
 
     # Open upscaled image, save it to the correct location and delete the temporary file
     upscaled_image = Image.open(new_file)
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    image.save(output_filepath)
     upscaled_image.save(output_filepath)
     os.remove(new_file)
 
