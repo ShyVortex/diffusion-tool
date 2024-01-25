@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 @DisplayName("Test for threads")
 public class ThreadTest {
     @Test
@@ -23,9 +25,12 @@ public class ThreadTest {
         testThread.start();
 
         testThread.join();
-        assert !testThread.isAlive();
-        System.out.println("TERMINATED");
+        assertFalse(testThread.isAlive());
 
-        System.out.println("\nTEST SUCCESSFUL.\n");
+        System.out.println("""
+                TERMINATED.
+                
+                TEST SUCCESSFUL.
+                """);
     }
 }
