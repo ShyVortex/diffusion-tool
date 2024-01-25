@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.UUID;
 
 public class User implements Serializable {
@@ -20,13 +21,15 @@ public class User implements Serializable {
     private transient Image profilePic; // transient = not serialized directly
     private int genImgsNum;
     private int upsImgsNum;
+    public static boolean isTest;
 
     public User(String email, String username, String password, LocalDate birthDate) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.birthDate = birthDate;
-        this.profilePic = new Image("/default/new-user.png");
+        if (!isTest)
+            this.profilePic = new Image("/default/new-user.png");
         this.genImgsNum = 0;
         this.upsImgsNum = 0;
     }
@@ -91,6 +94,20 @@ public class User implements Serializable {
 
     public void incUpscaledImages() {this.upsImgsNum++;}
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(email, user.email)
+                && Objects.equals(username, user.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email, username);
+    }
+
     public String toString() {
         return "User {\n id='" + this.id + "',\n email='" + this.email + "',\n username='"
                 + this.username + "',\n password='" + this.password + "',\n birthDate="
@@ -103,10 +120,12 @@ public class User implements Serializable {
         out.defaultWriteObject();
 
         // Convert Image to byte array and write it to the stream
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        ImageIO.write(SwingFXUtils.fromFXImage(profilePic, null), "png", byteStream);
-        byte[] imageBytes = byteStream.toByteArray();
-        out.writeObject(imageBytes);
+        if (!isTest) {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            ImageIO.write(SwingFXUtils.fromFXImage(profilePic, null), "png", byteStream);
+            byte[] imageBytes = byteStream.toByteArray();
+            out.writeObject(imageBytes);
+        }
     }
 
     @Serial
@@ -114,9 +133,11 @@ public class User implements Serializable {
         in.defaultReadObject();
 
         // Read the byte array from the stream and convert it back to Image
-        byte[] imageBytes = (byte[]) in.readObject();
-        ByteArrayInputStream byteStream = new ByteArrayInputStream(imageBytes);
-        BufferedImage bufferedImage = ImageIO.read(byteStream);
-        profilePic = SwingFXUtils.toFXImage(bufferedImage, null);
+        if (!isTest) {
+            byte[] imageBytes = (byte[]) in.readObject();
+            ByteArrayInputStream byteStream = new ByteArrayInputStream(imageBytes);
+            BufferedImage bufferedImage = ImageIO.read(byteStream);
+            profilePic = SwingFXUtils.toFXImage(bufferedImage, null);
+        }
     }
 }

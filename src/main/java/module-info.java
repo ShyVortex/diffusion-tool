@@ -18,5 +18,7 @@ module it.unimol.diffusiontool {
     exports it.unimol.diffusiontool.controller;
     exports it.unimol.diffusiontool.entities;
     exports it.unimol.diffusiontool.exceptions;
+    exports it.unimol.diffusiontool.threads;
+    exports it.unimol.diffusiontool.validators;
     opens it.unimol.diffusiontool.controller to javafx.fxml;
 }
