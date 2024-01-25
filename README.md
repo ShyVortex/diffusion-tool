@@ -15,7 +15,7 @@ In order to compile and run the software, it is required that you have the follo
 - Open Java Development Kit (OpenJDK) 17 or above
 - Apache Maven (at least version 3.6.3 is recommended)
  
-You also MUST install a Python virtual environment in the working directory, inside a folder named 'venv', 
+You also MUST install a Python virtual environment in your home directory, inside a folder named 'venv',
 with the packages listed in *requirements*.
  ```shell
  pip install -r requirements.txt
@@ -31,6 +31,19 @@ AI-computing capable hardware that has a GPU with enough VRAM should be capable 
 | `CPU` Intel Core i5-7500 / AMD Ryzen 5 1600 | Intel Core i7-9700k / AMD Ryzen 5 3600x                       |
 | `RAM` 16 GBs                                | 16 GBs                                                        |
 | `GPU` NVIDIA GeForce GTX 1660 SUPER         | NVIDIA GeForce RTX 3060                                       |
+
+# Building
+Executable packages can be downloaded from [Releases](https://github.com/ShyVortex/diffusion-tool/releases) or manually built instead.  
+You can do that assuming the above prerequisites have already been installed.  
+Once you're in the project directory, type the following in a terminal to download the dependencies and compile all the classes:
+ ```shell
+ mvn clean install
+ ```
+Then, if you also want a runnable .jar archive, type:
+ ```shell
+ mvn package
+ ```
+With these commands, a new folder named 'target' is created containing the compiled project as well as the executable file.
 
 # Credits
 As stated before, this project uses BSRGAN's degradation model for upscaling purposes.  
