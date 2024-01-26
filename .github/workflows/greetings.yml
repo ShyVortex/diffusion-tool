@@ -1,0 +1,19 @@
+name: Greetings
+
+on:
+  pull_request_target:
+  issues:
+    types: [opened]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-message: "Thank you for taking the time to identify an issue in diffusion-tool! This is your first issue."
+        pr-message: "Thank you for contributing to the development of diffusion-tool! This is your first pull request."
