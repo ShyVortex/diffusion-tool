@@ -630,7 +630,7 @@ public class DiffusionController implements Pythonable {
                 StoppableThread pyThread = new StoppableThread(() -> {
                     try {
                         processingThread.join();
-                        base64EncodedImage.set(callPythonScript(prompt, tags, formattedDate));
+                        base64EncodedImage.set(callPyScript(prompt, tags, formattedDate));
                         StoppableThread.currentThread().stop(StoppableThread.currentThread());
                     } catch (IOException | GenerationException e) {
                         e.printStackTrace();
@@ -877,7 +877,7 @@ public class DiffusionController implements Pythonable {
                             while (!isOutOfMemory.get() && !isAlertShown.get()) {
                                 try {
                                     if (!processingThread.isAlive()) {
-                                        base64EncodedImage.set(callPythonScript(imgPath));
+                                        base64EncodedImage.set(callPyScript(imgPath));
                                         if (base64EncodedImage.get().equals("OUT OF MEMORY")) {
                                             isOutOfMemory.set(true);
                                             throw new OutOfMemoryError();
@@ -1046,13 +1046,13 @@ public class DiffusionController implements Pythonable {
     }
 
     @Override
-    public String callPythonScript(String prompt, String tags, String date, String path) throws IOException,
+    public String callPyScript(String prompt, String tags, String date, String path) throws IOException,
             GenerationException, UpscalingException
     {
         // Get all necessary paths
-        File pythonVenv = findPythonVenv();
+        File pythonVenv = findPyVenv();
         String activateScriptPath = pythonVenv.getPath();
-        File pythonScript = findPythonScript();
+        File pythonScript = findPyScript();
         String pythonScriptPath = pythonScript.getPath();
 
         // Initialize logs
@@ -1147,9 +1147,9 @@ public class DiffusionController implements Pythonable {
     }
 
     @Override
-    public String callPythonScript(String prompt, String tags, String date) throws IOException, GenerationException {
+    public String callPyScript(String prompt, String tags, String date) throws IOException, GenerationException {
         try {
-            return callPythonScript(prompt, tags, date, null);
+            return callPyScript(prompt, tags, date, null);
 
             // called by OnCreateClick(), you can't get an UpscalingException
         } catch (UpscalingException ignored) {}
@@ -1158,13 +1158,13 @@ public class DiffusionController implements Pythonable {
     }
 
     @Override
-    public String callPythonScript(String imgPath) throws IOException, UpscalingException {
+    public String callPyScript(String imgPath) throws IOException, UpscalingException {
         LocalDateTime currentDate = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
         formattedDate = currentDate.format(formatter);
 
         try {
-            return callPythonScript("", null, formattedDate, imgPath);
+            return callPyScript("", null, formattedDate, imgPath);
 
             // called by OnUpscaleStartClick(), you can't get a GenerationException
         } catch (GenerationException ignored) {}
@@ -1173,7 +1173,7 @@ public class DiffusionController implements Pythonable {
     }
 
     @Override
-    public File findPythonVenv() {
+    public File findPyVenv() {
         // Get user's home directory and virtual environment folder
         String userHome = System.getProperty("user.home");
         File directory = new File(userHome, "venv");
@@ -1182,7 +1182,7 @@ public class DiffusionController implements Pythonable {
     }
 
     @Override
-    public File findPythonScript() {
+    public File findPyScript() {
         // Get the working directory
         String workingDirectory = System.getProperty("user.dir");
         File directory = new File(workingDirectory);
