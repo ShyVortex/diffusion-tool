@@ -1078,11 +1078,11 @@ public class DiffusionController implements Pythonable {
         List<String> upscaleCommand;
         ProcessBuilder processBuilder;
 
-        // Check that pixel art style is being used, if so apply token
-        if (styleComboBox.getValue().equals("Pixel Art"))
-            prompt = prompt + ", pixelartstyle";
-
         if (pythonCalledBy == GENERATE.getValue()) {
+            // Check that pixel art style is being used, if so apply token
+            if (styleComboBox.getValue().equals("Pixel Art"))
+                prompt = prompt + ", pixelartstyle";
+
             generateCommand = List.of (
                     activateScriptPath,      // Activate virtual environment
                     pythonScriptPath,        // Path to the Python script
