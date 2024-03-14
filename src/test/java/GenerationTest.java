@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class GenerationTest {
     private String prompt;
     private String tags;
+    private static int iteration;
     private final String pattern = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
     private final Pattern regex = Pattern.compile(pattern);
 
@@ -32,6 +33,7 @@ public class GenerationTest {
     public void mainTest() {
         String encodedImage = "";
 
+        // General test
         try {
             encodedImage = callPythonScript(prompt, tags);
         } catch (IOException | GenerationException e) {
@@ -41,6 +43,18 @@ public class GenerationTest {
 
         Matcher b64check = regex.matcher(encodedImage);
         assertTrue(b64check.find());
+        iteration++;
+
+        // Pixel Art test
+        try {
+            encodedImage = callPythonScript(prompt, tags);
+        } catch (IOException | GenerationException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(encodedImage);
+
+        Matcher b64check2 = regex.matcher(encodedImage);
+        assertTrue(b64check2.find());
     }
 
     @DisplayName("Generation")
@@ -48,9 +62,13 @@ public class GenerationTest {
         // Get all necessary paths, initialize log
         File pythonVenv = findPythonVenv();
         String activateScriptPath = pythonVenv.getPath();
-        File pythonScript = findPythonScript();
+        File pythonScript = findPythonScript(iteration);
         String pythonScriptPath = pythonScript.getPath();
         StringBuilder output = new StringBuilder();
+
+        // Check if it's testing pixel art generation
+        if (iteration == 2)
+            prompt = prompt + ", pixelartstyle";
 
         // Construct the command to execute
         List<String> generateCommand;
@@ -100,11 +118,15 @@ public class GenerationTest {
         return searchFile(directory, "python");
     }
 
-    public File findPythonScript() {
+    public File findPythonScript(int iteration) {
         // Get the working directory
         String workingDirectory = System.getProperty("user.dir");
         File directory = new File(workingDirectory);
-        String fileName = "generate_test.py";
+        String fileName;
+        if (iteration == 1)
+            fileName = "generate_test.py";
+        else
+            fileName = "generate_pixart_test.py";
 
         return searchFile(directory, fileName);
     }

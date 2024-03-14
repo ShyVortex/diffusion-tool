@@ -47,7 +47,7 @@ def main():
         guidance_scale=0,
         generator=torch.manual_seed(33),
     ).images[0]
-    output_folder = os.path.abspath("result/generated")
+    output_folder = os.path.abspath("result/generated/general")
     output_filename = f"generated_image_{date}.png"
     output_filepath = os.path.join(output_folder, output_filename)
 

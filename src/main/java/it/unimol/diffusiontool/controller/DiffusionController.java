@@ -126,6 +126,8 @@ public class DiffusionController implements Pythonable {
     @FXML
     private Button createButton;
     @FXML
+    private ComboBox<String> styleComboBox;
+    @FXML
     private CheckBox upscaleCheckBox;
     @FXML
     private Label processingLabel;
@@ -135,8 +137,6 @@ public class DiffusionController implements Pythonable {
     private Button imageDeleteButton;
     @FXML
     private Button imageShowButton;
-    @FXML
-    private Button selectButton;
     @FXML
     private Pane firstImagePane;
     @FXML
@@ -247,6 +247,12 @@ public class DiffusionController implements Pythonable {
         profileButton.setBackground(null);
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         homeUserImage.imageProperty().bind(profilePicProperty);
+        styleComboBox.getItems().addAll(
+                "General",
+                "Pixel Art"
+        );
+        styleComboBox.setPromptText(styleComboBox.getItems().get(0));
+        styleComboBox.setValue("General");
     }
 
     @FXML
@@ -571,6 +577,14 @@ public class DiffusionController implements Pythonable {
             deleteSessionData();
             OnLogOutClick();
         }
+    }
+
+    @FXML
+    private void OnStyleSelect() {
+        if (styleComboBox.getValue().equals("General"))
+            upscaleCheckBox.setVisible(true);
+        else
+            upscaleCheckBox.setVisible(false);
     }
 
     @FXML
@@ -1064,6 +1078,10 @@ public class DiffusionController implements Pythonable {
         List<String> upscaleCommand;
         ProcessBuilder processBuilder;
 
+        // Check that pixel art style is being used, if so apply token
+        if (styleComboBox.getValue().equals("Pixel Art"))
+            prompt = prompt + ", pixelartstyle";
+
         if (pythonCalledBy == GENERATE.getValue()) {
             generateCommand = List.of (
                     activateScriptPath,      // Activate virtual environment
@@ -1190,8 +1208,11 @@ public class DiffusionController implements Pythonable {
         String fileName;
         switch (pythonCalledBy) {
             case 1:
-                // if (includeUpscaling) -> generate_upscale.py, else -> generate.py
-                fileName = includeUpscaling ? "generate_upscale.py" : "generate.py";
+                if (styleComboBox.getValue().equals("General"))
+                    // if (includeUpscaling) -> generate_upscale.py, else -> generate.py
+                    fileName = includeUpscaling ? "generate_upscale.py" : "generate.py";
+                else
+                    fileName = "generate_pixart.py";
                 break;
             case 2:
                 fileName = "upscale.py";

@@ -18,6 +18,8 @@ In order to compile and run the software, it is required that you have the follo
 You also MUST install a Python virtual environment in your home directory, inside a folder named 'venv',
 with the packages listed in *requirements*.
  ```shell
+ cd ~/venv/bin
+ source activate
  pip install -r requirements.txt
  ```
 
@@ -57,6 +59,8 @@ The project utilizes Stable Diffusion's generative AI pipelines for image genera
 + [stable-diffusion-2-1](https://huggingface.co/stabilityai/stable-diffusion-2-1)
 + [stable-diffusion-2-1-base](https://huggingface.co/stabilityai/stable-diffusion-2-1-base)
 + [sd-x2-latent-upscaler](https://huggingface.co/stabilityai/sd-x2-latent-upscaler)
++ [pixel-art-style](https://huggingface.co/kohbanye/pixel-art-style)
++ [pixel-art-xl](https://huggingface.co/nerijs/pixel-art-xl)
 
 # License
 - This project is distributed under the [GNU General Public License v3.0](https://github.com/ShyVortex/diffusion-tool/blob/master/LICENSE.md).

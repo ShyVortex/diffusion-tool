@@ -18,7 +18,7 @@ def main():
     tags = sys.argv[2]
 
     # Model initialization and processing
-    repo_id = "stabilityai/stable-diffusion-2-1"
+    repo_id = "kohbanye/pixel-art-style"
     pipe = DiffusionPipeline.from_pretrained(repo_id, torch_dtype=torch.float16, variant="fp16")
     pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
     pipe = pipe.to("cuda")

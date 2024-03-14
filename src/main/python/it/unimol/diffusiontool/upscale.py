@@ -114,19 +114,19 @@ class RRDBNet(nn.Module):
     def __init__(self, in_nc=3, out_nc=3, nf=64, nb=23, gc=32, sf=4):
         super(RRDBNet, self).__init__()
         RRDB_block_f = functools.partial(RRDB, nf=nf, gc=gc)
-        self.sf = sf
+        self.sf = sf  # scale factor
 
-        self.conv_first = nn.Conv2d(in_nc, nf, 3, 1, 1, bias=True)
-        self.RRDB_trunk = make_layer(RRDB_block_f, nb)
-        self.trunk_conv = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
-        # upsampling
-        self.upconv1 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
+        self.conv_first = nn.Conv2d(in_nc, nf, 3, 1, 1, bias=True)  # Characteristics Detector
+        self.RRDB_trunk = make_layer(RRDB_block_f, nb)  # set of RRDB blocks
+        self.trunk_conv = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)  # Characteristics Merger
+
+        self.upconv1 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)  # upscaling
         if self.sf == 4:
             self.upconv2 = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
-        self.HRconv = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
-        self.conv_last = nn.Conv2d(nf, out_nc, 3, 1, 1, bias=True)
+        self.HRconv = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)  # HR Details Elaborator
+        self.conv_last = nn.Conv2d(nf, out_nc, 3, 1, 1, bias=True)  # Output Generator
 
-        self.lrelu = nn.LeakyReLU(negative_slope=0.2, inplace=True)
+        self.lrelu = nn.LeakyReLU(negative_slope=0.2, inplace=True)  # located next to HRconv
 
     def forward(self, x):
         fea = self.conv_first(x)
@@ -142,25 +142,26 @@ class RRDBNet(nn.Module):
 
         return out
 
-
-def initialize_weights(net_l, scale=1):
-    if not isinstance(net_l, list):
-        net_l = [net_l]
-    for net in net_l:
-        for m in net.modules():
-            if isinstance(m, nn.Conv2d):
-                init.kaiming_normal_(m.weight, a=0, mode='fan_in')
-                m.weight.data *= scale  # for residual block
-                if m.bias is not None:
-                    m.bias.data.zero_()
-            elif isinstance(m, nn.Linear):
-                init.kaiming_normal_(m.weight, a=0, mode='fan_in')
-                m.weight.data *= scale
-                if m.bias is not None:
-                    m.bias.data.zero_()
-            elif isinstance(m, nn.BatchNorm2d):
-                init.constant_(m.weight, 1)
-                init.constant_(m.bias.data, 0.0)
+    def initialize_weights(net_l, scale=1):
+        if not isinstance(net_l, list):
+            net_l = [net_l]
+        for net in net_l:
+            for m in net.modules():
+                if isinstance(m, nn.Conv2d):
+                    init.kaiming_normal_(m.weight, a=0, mode='fan_in')
+                    m.weight.data *= scale  # for residual block
+                    if m.bias is not None:
+                        m.bias.data.zero_()
+                elif isinstance(m, nn.Linear):
+                    # Kaiming initialization
+                    init.kaiming_normal_(m.weight, a=0, mode='fan_in')
+                    m.weight.data *= scale
+                    if m.bias is not None:
+                        m.bias.data.zero_()
+                elif isinstance(m, nn.BatchNorm2d):
+                    # weight = 1, bias = 0
+                    init.constant_(m.weight, 1)
+                    init.constant_(m.bias.data, 0.0)
 
 
 def image_to_uint(path, n_channels=3):
@@ -200,7 +201,7 @@ def tensor_to_uint(img):
     img = img.data.squeeze().float().clamp_(0, 1).cpu().numpy()
     if img.ndim == 3:
         img = np.transpose(img, (1, 2, 0))
-    return np.uint8((img*255.0).round())
+    return np.uint8((img * 255.0).round())
 
 
 def save_image(img, img_path):
