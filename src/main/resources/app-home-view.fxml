@@ -80,5 +80,10 @@
             <Font size="18.0" />
          </font>
       </Label>
+      <Label fx:id="versionLabel" layoutX="797.0" layoutY="698.0" text="v.">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
    </AnchorPane>
 </HBox>

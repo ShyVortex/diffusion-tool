@@ -6,7 +6,7 @@
 
     <groupId>it.unimol</groupId>
     <artifactId>diffusion-tool</artifactId>
-    <version>0.9b</version>
+    <version>1.0</version>
     <name>diffusion-tool</name>
 
     <properties>

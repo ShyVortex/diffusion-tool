@@ -76,6 +76,8 @@ public class DiffusionController implements Pythonable {
     @FXML
     private Label upscImgsLabel;
     @FXML
+    private Label versionLabel;
+    @FXML
     private ImageView homeUserImage;
     @FXML
     private ImageView profileUserImage;
@@ -220,6 +222,7 @@ public class DiffusionController implements Pythonable {
             stage.setTitle("Home");
         });
         profileButton.setBackground(null);
+        versionLabel.textProperty().bind(Bindings.createStringBinding(this::showVersionNumber));
         genImgsLabel.textProperty().bind(Bindings.createStringBinding(this::countGeneratedImgs));
         upscImgsLabel.textProperty().bind(Bindings.createStringBinding(this::countUpscaledImgs));
         profilePicProperty.set(diffApp.getUser().getProfilePic());
@@ -1253,6 +1256,10 @@ public class DiffusionController implements Pythonable {
     @SuppressWarnings("automatic")
     public void setStage(Stage stage) {
         // no action needed, stage is passed from DiffusionApplication
+    }
+
+    private String showVersionNumber() {
+        return "v. " + this.diffApp.getVersion();
     }
 
     private String countGeneratedImgs() {

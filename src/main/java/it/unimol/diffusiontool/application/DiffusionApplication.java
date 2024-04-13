@@ -20,6 +20,7 @@ public class DiffusionApplication extends Application {
     private Parent rootNode;
     private Stage stage;
     private FXMLLoader currentFXML;
+    private String version;
     private static User user;
     private final UserManager userManager = LoginApplication.getUserManager();
     private static DiffusionApplication toolInstance;
@@ -31,6 +32,10 @@ public class DiffusionApplication extends Application {
 
     public static DiffusionApplication getToolInstance() {
         return toolInstance;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     public Parent getRootNode() {
@@ -47,6 +52,10 @@ public class DiffusionApplication extends Application {
 
     public User getUser() {
         return user;
+    }
+
+    private void setVersion() {
+        this.version = "1.0";
     }
 
     public void setRootNode(Parent rootNode) {
@@ -71,6 +80,7 @@ public class DiffusionApplication extends Application {
 
     public void start(Stage stage) throws IOException {
         currentFXML = new FXMLLoader(FXMLProperties.getInstance().getHomeFXML().getLocation());
+        this.setVersion();
         this.rootNode = currentFXML.load();
 
         DiffusionController diffController = currentFXML.getController();
