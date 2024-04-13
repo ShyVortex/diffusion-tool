@@ -47,6 +47,19 @@ Then, if you also want a runnable .jar archive, type:
  ```
 With these commands, a new folder named 'target' is created containing the compiled project as well as the executable file.
 
+# Screenshots
+### Home
+![immagine](https://github.com/ShyVortex/diffusion-tool/assets/111277410/53a8ba6f-a189-4376-a8af-0c9996a26d62)
+### Image Generation
+![immagine](https://github.com/ShyVortex/diffusion-tool/assets/111277410/4a83e1f2-3613-4ae2-a498-cb3f2a8b1479)
+### Image Upscaling
+![immagine](https://github.com/ShyVortex/diffusion-tool/assets/111277410/e6f6aea6-e9a2-46f4-8b7b-066ae73aa8f4)
+
+# Upscaling Comparison
+### Low-res vs. Upscaled
+![UpscalingComparison](https://github.com/ShyVortex/diffusion-tool/assets/111277410/0e380dda-36f4-4187-8ff2-9cf287dca06d)
+![UpscalingComparison2](https://github.com/ShyVortex/diffusion-tool/assets/111277410/05f0d876-1b9b-4b50-8dba-c558abf815fe)
+
 # Credits
 As stated before, this project uses BSRGAN's degradation model for upscaling purposes.  
 BSRGAN is a practical degradation model for Deep Blind Image Super-Resolution, developed by [Kai Zhang](https://cszn.github.io/), Jingyun Liang, 
