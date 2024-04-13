@@ -1,5 +1,6 @@
 package it.unimol.diffusiontool.controller;
 
+import com.idrsolutions.image.JDeli;
 import it.unimol.diffusiontool.application.DiffusionApplication;
 import it.unimol.diffusiontool.application.LoginApplication;
 import it.unimol.diffusiontool.application.ViewerApplication;
@@ -28,6 +29,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -539,11 +541,12 @@ public class DiffusionController implements Pythonable {
             File file = fileChooser.showOpenDialog(new Stage());
             // Set a filter to only allow image files
             FileChooser.ExtensionFilter imageFilter = new FileChooser.ExtensionFilter("Image Files",
-                    "*.png", "*.jpg", "*.jpeg", "*.gif");
+                    "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp");
             fileChooser.getExtensionFilters().add(imageFilter);
 
             if (file != null) {
-                // Double check to prevent errors
+                if (file.getName().endsWith(".webp"))
+                    convertToJPEG(file);
                 if (isImageFile(file)) {
                     Image newPfp = new Image(file.toURI().toString());
                     user.setProfilePic(newPfp);
@@ -560,6 +563,8 @@ public class DiffusionController implements Pythonable {
             invObjAlert.setHeaderText("ERROR: Not an Image");
             invObjAlert.setContentText("The selected file is not an image. Please retry.");
             invObjAlert.showAndWait();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -752,10 +757,12 @@ public class DiffusionController implements Pythonable {
                     fileChooser.setTitle("Select an image");
                     File file = fileChooser.showOpenDialog(new Stage());
                     FileChooser.ExtensionFilter imageFilter = new FileChooser.ExtensionFilter("Image Files",
-                            "*.png", "*.jpg", "*.jpeg", "*.gif");
+                            "*.png", "*.jpg", "*.jpeg", "*.gif, *.webp");
                     fileChooser.getExtensionFilters().add(imageFilter);
 
                     if (file != null) {
+                        if (file.getName().endsWith(".webp"))
+                            convertToJPEG(file);
                         if (isImageFile(file)) {
                             double size = getFileSize(file);
                             if (size <= 5120) {
@@ -812,6 +819,8 @@ public class DiffusionController implements Pythonable {
                     invObjAlert.showAndWait();
                 } catch (FileNotFoundException ignored) {
                     // If the file is null no image is selected, so we can just skip
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
 
             } else
@@ -1373,6 +1382,11 @@ public class DiffusionController implements Pythonable {
         String encodedImage = Base64.getEncoder().encodeToString(imageBytes);
 
         return encodedImage;
+    }
+
+    private void convertToJPEG(File file) throws Exception {
+        BufferedImage bufferedImage = JDeli.read(file);
+        JDeli.write(bufferedImage, "jpg", file);
     }
 
     private void deleteSessionData() {

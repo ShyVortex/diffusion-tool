@@ -91,6 +91,11 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.idrsolutions</groupId>
+            <artifactId>jdeli</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -186,7 +191,7 @@
                 </includes>
             </resource>
             <resource>
-                <directory>${project.basedir}/models</directory>
+                <directory>local/models</directory>
                 <filtering>false</filtering>
                 <includes>
                     <include>**/*.pth</include>
