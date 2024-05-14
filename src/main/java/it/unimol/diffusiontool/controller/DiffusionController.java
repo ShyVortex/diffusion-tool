@@ -1,6 +1,5 @@
 package it.unimol.diffusiontool.controller;
 
-import com.idrsolutions.image.JDeli;
 import it.unimol.diffusiontool.application.DiffusionApplication;
 import it.unimol.diffusiontool.application.LoginApplication;
 import it.unimol.diffusiontool.application.ViewerApplication;
@@ -1392,8 +1391,8 @@ public class DiffusionController implements Pythonable {
     }
 
     private void convertToJPEG(File file) throws Exception {
-        BufferedImage bufferedImage = JDeli.read(file);
-        JDeli.write(bufferedImage, "jpg", file);
+        BufferedImage image = ImageIO.read(file);
+        ImageIO.write(image, "jpg", file);
     }
 
     private void deleteSessionData() {
