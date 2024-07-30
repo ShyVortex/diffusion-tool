@@ -4,7 +4,7 @@ charset-normalizer==3.3.2
 diffusers==0.29.2
 filelock==3.13.1
 fsspec==2023.12.2
-huggingface-hub==0.20.1
+huggingface-hub==0.24.3
 idna==3.7
 importlib-metadata==7.0.1
 Jinja2==3.1.4
