@@ -27,13 +27,14 @@ public class GenerationTest {
     public void init() {
         prompt = "a photo of an astronaut riding a horse on mars";
         tags = "";
+        iteration = 1;
     }
 
     @Test
     public void mainTest() {
         String encodedImage = "";
 
-        // General test
+        // stable-diffusion-2-1 test
         try {
             encodedImage = callPythonScript(prompt, tags);
         } catch (IOException | GenerationException e) {
@@ -45,7 +46,7 @@ public class GenerationTest {
         assertTrue(b64check.find());
         iteration++;
 
-        // Pixel Art test
+        // stable-diffusion-3 test
         try {
             encodedImage = callPythonScript(prompt, tags);
         } catch (IOException | GenerationException e) {
@@ -55,6 +56,18 @@ public class GenerationTest {
 
         Matcher b64check2 = regex.matcher(encodedImage);
         assertTrue(b64check2.find());
+        iteration++;
+
+        // pixel-art-style test
+        try {
+            encodedImage = callPythonScript(prompt, tags);
+        } catch (IOException | GenerationException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(encodedImage);
+
+        Matcher b64check3 = regex.matcher(encodedImage);
+        assertTrue(b64check3.find());
     }
 
     @DisplayName("Generation")
@@ -66,9 +79,19 @@ public class GenerationTest {
         String pythonScriptPath = pythonScript.getPath();
         StringBuilder output = new StringBuilder();
 
-        // Check if it's testing pixel art generation
-        if (iteration == 2)
-            prompt = prompt + ", pixelartstyle";
+        switch (iteration) {
+            case 1: // call stable-diffusion-2-1 pipeline
+                prompt = prompt + ", sd2-1";
+                break;
+            case 2: // call stable-diffusion-3 pipeline
+                prompt = prompt + ", sd3";
+                break;
+            case 3: // call pixel-art-style pipeline
+                prompt = prompt + ", pixel-art-style";
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
 
         // Construct the command to execute
         List<String> generateCommand;
@@ -122,11 +145,14 @@ public class GenerationTest {
         // Get the working directory
         String workingDirectory = System.getProperty("user.dir");
         File directory = new File(workingDirectory);
-        String fileName;
-        if (iteration == 1)
-            fileName = "generate_test.py";
-        else
-            fileName = "generate_pixart_test.py";
+
+        // Find appropriate script
+        String fileName = switch (iteration) {
+            case 1 -> "generate_sd2-1_test.py";
+            case 2 -> "generate_sd3_test.py";
+            case 3 -> "generate_pixart_test.py";
+            default -> throw new UnsupportedOperationException();
+        };
 
         return searchFile(directory, fileName);
     }
