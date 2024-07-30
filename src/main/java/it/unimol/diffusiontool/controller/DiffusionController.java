@@ -252,11 +252,12 @@ public class DiffusionController implements Pythonable {
         profilePicProperty.set(diffApp.getUser().getProfilePic());
         homeUserImage.imageProperty().bind(profilePicProperty);
         styleComboBox.getItems().addAll(
-                "General",
+                "Stable Diffusion 2.1",
+                "Stable Diffusion 3",
                 "Pixel Art"
         );
         styleComboBox.setPromptText(styleComboBox.getItems().get(0));
-        styleComboBox.setValue("General");
+        styleComboBox.setValue("Stable Diffusion 2.1");
     }
 
     @FXML
@@ -588,10 +589,10 @@ public class DiffusionController implements Pythonable {
 
     @FXML
     private void OnStyleSelect() {
-        if (styleComboBox.getValue().equals("General"))
-            upscaleCheckBox.setVisible(true);
-        else
-            upscaleCheckBox.setVisible(false);
+        // Upscaling checkbox only visible if selected model is SD2.1
+        upscaleCheckBox.setVisible(
+                styleComboBox.getValue().equals("Stable Diffusion 2.1")
+        );
     }
 
     @FXML
@@ -1219,9 +1220,9 @@ public class DiffusionController implements Pythonable {
         String fileName;
         switch (pythonCalledBy) {
             case 1:
-                if (styleComboBox.getValue().equals("General"))
-                    // if (includeUpscaling) -> generate_upscale.py, else -> generate.py
-                    fileName = includeUpscaling ? "generate_upscale.py" : "generate.py";
+                if (styleComboBox.getValue().equals("Stable Diffusion 2.1"))
+                    // if (includeUpscaling) -> generate_upscale.py, else -> generate_sd2-1.py
+                    fileName = includeUpscaling ? "generate_upscale.py" : "generate_sd2-1.py";
                 else
                     fileName = "generate_pixart.py";
                 break;
