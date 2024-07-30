@@ -1,7 +1,7 @@
 <p align="center">
   <img width="180" src="src/main/resources/tool/logo-512.png" alt="diffusion-tool"></img>
   <h1 align="center">diffusion-tool</h1>
-  <p align="center">AI image generator and upscaler created for my third-year Artificial Intelligence university exam, using Java and Python
+  <p align="center">Image generator and upscaler created for my AI university exam
 </p>
 
 ## Description
