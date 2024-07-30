@@ -1223,6 +1223,8 @@ public class DiffusionController implements Pythonable {
                 if (styleComboBox.getValue().equals("Stable Diffusion 2.1"))
                     // if (includeUpscaling) -> generate_upscale.py, else -> generate_sd2-1.py
                     fileName = includeUpscaling ? "generate_upscale.py" : "generate_sd2-1.py";
+                else if (styleComboBox.getValue().equals("Stable Diffusion 3"))
+                    fileName = "generate_sd3.py";
                 else
                     fileName = "generate_pixart.py";
                 break;

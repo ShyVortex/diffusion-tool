@@ -21,7 +21,9 @@ def main():
     repo_id = "stabilityai/stable-diffusion-2-1-base"  # you can use 2-1 if you have more VRAM
     pipe = DiffusionPipeline.from_pretrained(repo_id, torch_dtype=torch.float16, variant="fp16")
     pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
-    pipe = pipe.to("cuda")
+
+    # offload components to CPU during inference to save memory
+    pipe.enable_model_cpu_offload()
 
     # Load upscaling model
     model_id = "stabilityai/sd-x2-latent-upscaler"
@@ -47,7 +49,7 @@ def main():
         guidance_scale=0,
         generator=torch.manual_seed(33),
     ).images[0]
-    output_folder = os.path.abspath("result/generated/general")
+    output_folder = os.path.abspath("result/generated/sd2_1")
     output_filename = f"generated_image_{date}.png"
     output_filepath = os.path.join(output_folder, output_filename)
 

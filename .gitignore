@@ -41,3 +41,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Image Outputs ###
+/result/generated/**
+/result/upscaled/**

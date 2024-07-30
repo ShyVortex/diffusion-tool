@@ -81,7 +81,7 @@
          </font>
       </Label>
       <ComboBox fx:id="styleComboBox" layoutX="120.0" layoutY="340.0" onAction="#OnStyleSelect" prefWidth="175.0" />
-      <Label layoutX="50.0" layoutY="376.0" text="Enter tags to improve the result:">
+      <Label layoutX="50.0" layoutY="376.0" text="Enter what you don't want to see in the result:">
          <font>
             <Font size="16.0" />
          </font>
