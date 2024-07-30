@@ -6,7 +6,7 @@
 
     <groupId>it.unimol</groupId>
     <artifactId>diffusion-tool</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <name>diffusion-tool</name>
 
     <properties>
@@ -20,17 +20,17 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>17.0.6</version>
+            <version>17.0.12</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>17.0.6</version>
+            <version>17.0.12</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>17.0.6</version>
+            <version>17.0.12</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>
