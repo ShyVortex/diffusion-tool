@@ -1,10 +1,10 @@
 accelerate==0.26.1
 certifi==2024.7.4
 charset-normalizer==3.3.2
-diffusers==0.25.0
+diffusers==0.29.2
 filelock==3.13.1
 fsspec==2023.12.2
-huggingface-hub==0.20.1
+huggingface-hub==0.24.3
 idna==3.7
 importlib-metadata==7.0.1
 Jinja2==3.1.4
@@ -21,10 +21,10 @@ nvidia-cufft-cu12==11.0.2.54
 nvidia-curand-cu12==10.3.2.106
 nvidia-cusolver-cu12==11.4.5.107
 nvidia-cusparse-cu12==12.1.0.106
-nvidia-nccl-cu12==2.18.1
+nvidia-nccl-cu12==2.20.5
 nvidia-nvjitlink-cu12==12.3.101
 nvidia-nvtx-cu12==12.1.105
-opencv-python==4.9.0.80
+opencv-python==4.10.0.82
 packaging==23.2
 peft==0.9.0
 pillow==10.3.0
@@ -43,3 +43,4 @@ triton==2.1.0
 typing_extensions==4.9.0
 urllib3==2.2.2
 zipp==3.19.1
+sentencepiece==0.2.0

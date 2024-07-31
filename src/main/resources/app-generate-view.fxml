@@ -14,8 +14,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1300.0"
-      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0"
+      prefWidth="1300.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="it.unimol.diffusiontool.controller.DiffusionController">
 
    <VBox prefHeight="800.0" prefWidth="300.0">
@@ -75,13 +75,13 @@
          </font>
       </Label>
       <TextArea fx:id="promptArea" layoutX="50.0" layoutY="227.0" prefHeight="100.0" prefWidth="670.0" wrapText="true" />
-      <Label layoutX="50.0" layoutY="342.0" text="Style:">
+      <Label layoutX="50.0" layoutY="342.0" text="Model:">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <ComboBox fx:id="styleComboBox" layoutX="107.0" layoutY="340.0" onAction="#OnStyleSelect" prefWidth="150.0" />
-      <Label layoutX="50.0" layoutY="376.0" text="Enter tags to improve the result:">
+      <ComboBox fx:id="styleComboBox" layoutX="120.0" layoutY="340.0" onAction="#OnStyleSelect" prefWidth="175.0" />
+      <Label layoutX="50.0" layoutY="376.0" text="Enter what you don't want to see in the result:">
          <font>
             <Font size="16.0" />
          </font>
