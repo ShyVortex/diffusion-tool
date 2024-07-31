@@ -32,7 +32,8 @@ AI-computing capable hardware that has a GPU with enough VRAM should be capable 
 **ATTENTION**: currently, AMD GPUs are not supported as the application relies on CUDA, a technology exclusive to NVIDIA.
 |                 Minimum                     |                         Recommended                           |
 | ------------------------------------------- | ------------------------------------------------------------- |
-| `OS` Linux x64, X11 display server          | Linux x64, X11 display server                                 |
+| `OS` Linux x64                              | Linux x64                                                     |
+| `DSP` X.Org's X11                           | Wayland                                                       |
 | `CPU` Intel Core i5-7500 / AMD Ryzen 5 1600 | Intel Core i7-9700k / AMD Ryzen 5 3600x                       |
 | `RAM` 16 GBs                                | 16 GBs                                                        |
 | `GPU` NVIDIA GeForce GTX 1660 SUPER         | NVIDIA GeForce RTX 3060                                       |
