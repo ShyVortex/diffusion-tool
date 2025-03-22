@@ -35,7 +35,7 @@ requests==2.32.2
 safetensors==0.4.1
 sympy==1.12
 tokenizers==0.15.0
-torch==2.2.0
+torch==2.4.0
 torchvision==0.16.2
 tqdm==4.66.3
 transformers==4.48.0
