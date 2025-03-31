@@ -15,7 +15,7 @@
     <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredPackages">
         <value>
-          <list size="48">
+          <list size="49">
             <item index="0" class="java.lang.String" itemvalue="networkx" />
             <item index="1" class="java.lang.String" itemvalue="nvidia-nvjitlink-cu12" />
             <item index="2" class="java.lang.String" itemvalue="huggingface-hub" />
@@ -64,6 +64,7 @@
             <item index="45" class="java.lang.String" itemvalue="pillow" />
             <item index="46" class="java.lang.String" itemvalue="GPUtil" />
             <item index="47" class="java.lang.String" itemvalue="idna" />
+            <item index="48" class="java.lang.String" itemvalue="scipy" />
           </list>
         </value>
       </option>
