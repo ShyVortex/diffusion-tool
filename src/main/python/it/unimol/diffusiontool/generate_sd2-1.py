@@ -29,7 +29,7 @@ def main():
     # Process the prompt and set the output path
     with torch.cuda.amp.autocast():
         image = pipe(prompt=prompt, negative_prompt=tags, num_inference_steps=25).images[0]
-    output_folder = os.path.abspath("result/generated/sd2-1")
+    output_folder = os.path.abspath("result/generated/general/sd2-1")
     output_filename = f"generated_image_{date}.png"
     output_filepath = os.path.join(output_folder, output_filename)
 

@@ -41,7 +41,7 @@ def main():
             num_inference_steps=25,
             guidance_scale=6.5
         ).images[0]
-    output_folder = os.path.abspath("result/generated/sd3")
+    output_folder = os.path.abspath("result/generated/general/sd3")
     output_filename = f"generated_image_{date}.png"
     output_filepath = os.path.join(output_folder, output_filename)
 
