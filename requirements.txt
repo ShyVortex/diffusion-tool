@@ -47,3 +47,4 @@ sentencepiece==0.2.0
 bitsandbytes==0.45.4
 GPUtil==1.4.0
 scipy==1.11.2
+protobuf==6.30.2

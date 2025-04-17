@@ -10,7 +10,7 @@ import base64
 def main():
     # Check if the correct number of command-line arguments is provided
     if len(sys.argv) != 4:
-        print("Usage: python generate_sd3.py <prompt> <tags> <date>")
+        print("Usage: python generate_sd3.py <prompt> <tags> <date>", file=sys.stderr)
         sys.exit(1)
 
     # Get the prompt and date from the command-line arguments passed from Java
