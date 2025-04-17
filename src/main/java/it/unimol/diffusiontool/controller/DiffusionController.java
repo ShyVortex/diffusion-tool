@@ -254,6 +254,7 @@ public class DiffusionController implements Pythonable {
         styleComboBox.getItems().addAll(
                 "Stable Diffusion 2.1",
                 "Stable Diffusion 3",
+                "Stable Diffusion 3.5",
                 "Pixel Art"
         );
         styleComboBox.setPromptText(styleComboBox.getItems().get(0));
@@ -1149,6 +1150,7 @@ public class DiffusionController implements Pythonable {
             String inputLine;
             while ((inputLine = inputbufferedReader.readLine()) != null) {
                 output.append(inputLine).append("\n");
+                System.out.println(inputLine.trim());
             }
         }
 
@@ -1225,6 +1227,8 @@ public class DiffusionController implements Pythonable {
                     fileName = includeUpscaling ? "generate_upscale.py" : "generate_sd2-1.py";
                 else if (styleComboBox.getValue().equals("Stable Diffusion 3"))
                     fileName = "generate_sd3.py";
+                else if (styleComboBox.getValue().equals("Stable Diffusion 3.5"))
+                    fileName = "generate_sd3-5.py";
                 else
                     fileName = "generate_pixart.py";
                 break;
@@ -1343,7 +1347,7 @@ public class DiffusionController implements Pythonable {
             genAlert.setHeaderText("ERROR: Upscaling Failure");
             genAlert.setContentText("Something went wrong in the image upscaling. Please retry");
         }
-        genAlert.showAndWait();
+        Platform.runLater(genAlert::showAndWait);
     }
 
     private int checkAvailableSpace() {

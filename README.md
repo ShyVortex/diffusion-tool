@@ -17,6 +17,7 @@ The last two are the essential part of the project and they act as GUI for the P
 In order to compile and run the software, it is required that you have the following prerequisites:
 - Open Java Development Kit (OpenJDK) 17 or above
 - Apache Maven (at least version 3.6.3 is recommended)
+- Hugging Face CLI
  
 You also MUST install a Python virtual environment in your home directory, inside a folder named 'venv',
 with the packages listed in *requirements*.
@@ -51,13 +52,19 @@ Then, if you also want a runnable .jar archive, type:
  ```
 With these commands, a new folder named 'target' is created containing the compiled project as well as the executable file.
 
-## Unlock Stable Diffusion 3
-The newest generative model is currently gated, so first you need to sign up [here](https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers).  
+## Usage with Stable Diffusion 3 and 3.5
+The newest generative models are currently gated, so first you need to sign up [here](https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers) 
+and [here](https://huggingface.co/stabilityai/stable-diffusion-3.5-large-turbo).
 Proceed to generate a [token](https://huggingface.co/settings/tokens) under your account settings which you will use to login with:
  ```shell
  huggingface-cli login
  ```
 Enter your credentials first, then the token when it's needed.
+
+It is recommended to pre-download the quantized model of Stable Diffusion 3.5 to avoid long waiting times while using the app:
+ ```shell
+ huggingface-cli download diffusers/t5-nf4
+ ```
 
 ## Screenshots
 ### Home
@@ -84,6 +91,7 @@ The project utilizes Stable Diffusion's generative AI pipelines for image genera
 + [stable-diffusion-2-1](https://huggingface.co/stabilityai/stable-diffusion-2-1)
 + [stable-diffusion-2-1-base](https://huggingface.co/stabilityai/stable-diffusion-2-1-base)
 + [stable-diffusion-3-medium](https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers)
++ [stable-diffusion-3.5-large-turbo](https://huggingface.co/stabilityai/stable-diffusion-3.5-large-turbo)
 + [sd-x2-latent-upscaler](https://huggingface.co/stabilityai/sd-x2-latent-upscaler)
 + [pixel-art-style](https://huggingface.co/kohbanye/pixel-art-style)
 + [pixel-art-xl](https://huggingface.co/nerijs/pixel-art-xl)

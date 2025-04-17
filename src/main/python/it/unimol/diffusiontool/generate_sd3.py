@@ -10,7 +10,7 @@ import base64
 def main():
     # Check if the correct number of command-line arguments is provided
     if len(sys.argv) != 4:
-        print("Usage: python generate_sd3.py <prompt> <tags> <date>")
+        print("Usage: python generate_sd3.py <prompt> <tags> <date>", file=sys.stderr)
         sys.exit(1)
 
     # Get the prompt and date from the command-line arguments passed from Java
@@ -41,7 +41,7 @@ def main():
             num_inference_steps=25,
             guidance_scale=6.5
         ).images[0]
-    output_folder = os.path.abspath("result/generated/sd3")
+    output_folder = os.path.abspath("result/generated/general/sd3")
     output_filename = f"generated_image_{date}.png"
     output_filepath = os.path.join(output_folder, output_filename)
 
