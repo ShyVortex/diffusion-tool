@@ -55,7 +55,7 @@ public class DiffusionApplication extends Application {
     }
 
     private void setVersion() {
-        this.version = "1.1.0";
+        this.version = "1.2.0";
     }
 
     public void setRootNode(Parent rootNode) {
